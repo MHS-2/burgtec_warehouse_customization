@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!--    List View-->
+    <record id="burgtec_warehouse_customization.view_product_template_tree_ext" model="ir.ui.view">
+        <field name="name">burgtec_warehouse_customization.product.template.list.ext</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+                <field name="custom_product_type" widget="badge" decoration-info="custom_product_type == 'product'" decoration-warning="custom_product_type == 'component'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="burgtec_warehouse_customization.view_product_variant_tree_ext" model="ir.ui.view">
+        <field name="name">burgtec_warehouse_customization.product.variant.list.ext</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="after">
+                <field name="custom_variant_type" widget="badge" decoration-info="custom_variant_type == 'product'" decoration-warning="custom_variant_type == 'component'" />
+            </xpath>
+        </field>
+    </record>
+<!--    Form View-->
+    <record id="burgtec_warehouse_customization.product_template_form_ext" model="ir.ui.view">
+        <field name="name">burgtec_warehouse_customization.product.template.form.view.ext</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="after">
+                <label for="custom_product_type" string="Custom Product Type"/>
+                <field name="custom_product_type"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <!--    For Variant -->
+
+    <record id="burgtec_warehouse_customization.product_form_ext" model="ir.ui.view">
+        <field name="name">burgtec_warehouse_customization.product.product.form.view.ext</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="after">
+                <label for="custom_variant_type" string="Custom Variant Type"/>
+                <field name="custom_variant_type"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="burgtec_warehouse_customization.product_variant_easy_edit_view_form_ext" model="ir.ui.view">
+        <field name="name">burgtec_warehouse_customization.product.product.easy.edit.form.view.ext</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='default_code']" position="before">
+                <field name="custom_variant_type"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ######################## KANBAN VIEW INHERTI ################################### -->
+
+    <record id="burgtec_warehouse_customization.product_template_kanban_view" model="ir.ui.view">
+        <field name="name">burgtec_warehouse_customization.product.template.kanban.view</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//aside" position="replace">
+                <aside>
+                    <field name="custom_product_type" widget="badge" width="210px"
+                           decoration-info="custom_product_type == 'product'"
+                           decoration-warning="custom_product_type == 'component'"/>
+                    <field
+                            name="image_128"
+                            widget="image"
+                            alt="Product"
+                            options="{'img_class': 'w-100 object-fit-contain'}"
+                            invisible="not image_128"
+                    />
+                </aside>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sale_order_bom_component,sale.order.bom.component,model_sale_order_bom_component,,1,1,1,1
+access_sale_order_bom_component_line,sale.order.bom.component.line,model_sale_order_bom_component_line,,1,1,1,1
+access_bom_component_wizard,bom.component.wizard,model_bom_component_wizard,,1,1,1,1
+access_bom_component_wizard_line,bom.component.wizard.line,model_bom_component_wizard_line,,1,1,1,1
+
+

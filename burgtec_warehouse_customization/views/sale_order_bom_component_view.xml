@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_sale_order_bom_components_form" model="ir.ui.view">
+        <field name="name">sale.order.bom.components.form</field>
+        <field name="model">sale.order.bom.component</field>
+        <field name="arch" type="xml">
+            <form create="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="order_id" readonly="1" invisible="1"/>
+                        <field name="state" readonly="1" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page name="bom_lines" string="BOM Lines">
+                            <field name="component_line_ids"
+                                   widget="section_and_note_one2many"
+                                   mode="list"
+                                   no_label="True"
+                                   readonly="state == 'sale'"
+                            >
+                                <list class="no_reorder"
+                                      create="0"
+                                      limit="100"
+                                      editable="bottom"
+                                      decoration-success="is_parent == True"
+                                      decoration-warning="is_other_than_bom == True"
+                                      decoration-info="is_parent == False">
+
+                                    <!-- Section header fields -->
+
+                                    <field name="sequence" widget="handle" invisible="1"/>
+                                    <field name="is_auto_generated" column_invisible="1"/>
+                                    <field name="is_parent" column_invisible="1" force_save="1"/>
+                                    <field name="name" string="" readonly="1"/>
+                                    <button name="action_open_add_components_wizard"
+                                            string="Add Components"
+                                            type="object"
+                                            class="btn-primary btn-sm"
+                                            icon="fa-plus"
+                                            invisible="not is_parent"
+                                            help="Add components to this parent line"/>
+                                    <button name="action_open_update_parent_line"
+                                            string="Product"
+                                            type="object"
+                                            class="btn-primary btn-sm"
+                                            icon="fa-pencil"
+                                            invisible="not is_parent"
+                                            help=" components to this parent line"/>
+
+                                    <field name="product_id" width="400px"
+                                           options="{'no_open':1,'no_create':1}"
+                                           readonly="parent.state == 'sale'"
+                                           force_save="1" style="color:green;" required="1"/>
+                                    <field name="product_qty"
+                                           width="60px"
+                                           class="text-center"
+                                           readonly="parent.state == 'sale' or not is_parent or display_type " force_save="1"/>
+                                    <field name="unit_component_quantity" width="190px" class="text-center"
+                                           readonly="parent.state == 'sale' or is_parent or display_type" force_save="1"/>
+
+                                    <field name="unit_sale_price" width="100px" class="text-center"
+                                           readonly="parent.state == 'sale'"
+                                           force_save="1"/>
+                                    <field name="total_sale_price" width="100px" class="text-center"
+                                           readonly="parent.state == 'sale' or is_parent"
+                                           force_save="1"/>
+
+                                    <field name="live_unit_cost" readonly="is_parent" force_save="1" optional="show"
+                                           class="text-center"
+                                           decoration-warning="1 == 1" decoration-bf="1 == 1"/>
+                                    <field name="total_live_cost" width="100px" class="text-center"
+                                           readonly="1"
+                                           force_save="1" decoration-warning="1 == 1" optional="hide"/>
+                                    <field name="supplier_id" width="80px" class="text-center"
+                                           readonly="parent.state == 'sale'" options="{'no_create':1}" optional="hide"/>
+                                    <field name="margin_live_cost"
+                                           readonly="1" force_save="1" invisible="not is_parent" width="120px"
+                                           class="text-center"
+                                           decoration-warning="1 == 1"
+                                           optional="hide"/>
+
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sale_order_bom_components" model="ir.actions.act_window">
+        <field name="name">BOM Components</field>
+        <field name="res_model">sale.order.bom.component</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_sale_order_bom_components_form"/>
+        <field name="target">new</field>
+    </record>
+
+
+</odoo>

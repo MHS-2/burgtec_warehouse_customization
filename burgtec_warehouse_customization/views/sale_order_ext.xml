@@ -1,0 +1,31 @@
+<odoo>
+    <record id="sale_order_form_kit" model="ir.ui.view">
+        <field name="name">sale.order.form.kit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_title')]" position="after">
+                <div class="row">
+                    <div class="col-6"></div>
+                    <div class="col-6 d-flex gap-2 mt-3 mb-3">
+                        <button name="action_show_component" type="object" class="btn-primary" icon="fa-eye">
+                            Components
+                        </button>
+                    </div>
+                </div>
+
+            </xpath>
+
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']"
+                   position="after">
+                <field name="kit_bom_id" optional="show" options="{'no_create': True, 'no_open': True}"
+                       required="True"/>
+            </xpath>
+
+            <xpath expr="//page[@name='other_information']//field[@name='source_id']" position="after">
+                <field name="next_sequence"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

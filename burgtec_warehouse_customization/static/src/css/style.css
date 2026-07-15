@@ -1,0 +1,36 @@
+/* .modal-lg {
+    min-width: 1800px !important;
+} */
+.o_form_sheet_bg {
+     max-width: 4000px !important;
+}
+
+.bright-red {
+    color: #ff0000 !important;  /* Bright red */
+    font-weight: bold;          /* Optional */
+}
+
+.dark-blue {
+    color: #2457ff !important;  /* Bright red */
+    font-weight: bold;          /* Optional */
+}
+/* static/src/css/save_button.css */
+
+.o_form_button_save {
+    font-size: 18px !important;           /* Larger text */
+    padding: 6px 20px !important;        /* Larger padding */
+    background-color: #875A7B !important;  /* Bootstrap primary blue */
+    color: white !important;              /* White text */
+    border: none !important;              /* Remove default border */
+    border-radius: 4px !important;        /* Rounded corners */
+    margin-left: 28px;
+}
+.o_form_button_cancel {
+     margin-left: 8px;
+    font-size: 18px;
+    color: black;
+     background-color: #e0e0e0 !important; /* Light gray */
+    border: 1px solid #ccc !important;    /* Light border */
+    border-radius: 4px !important;
+}
+

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <!-- Wizard Form View -->
+        <record id="view_bom_component_wizard_form" model="ir.ui.view">
+            <field name="name">bom.component.wizard.form</field>
+            <field name="model">bom.component.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Add BOM Components">
+                    <sheet>
+                        <group invisible="1">
+                            <group>
+                                <field name="component_id" readonly="1"/>
+                                <field name="parent_line_sequence" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="parent_product_id" readonly="1"/>
+                                <field name="parent_line_id" readonly="1"/>
+                            </group>
+                        </group>
+                        <!--                        <notebook>-->
+                        <!--                            <page string="Components to Add">-->
+                        <field name="component_line_ids" nolabel="1">
+                            <list string="Components" editable="bottom"
+                                  decoration-info="display_type == 'line_section'"
+                                  decoration-warning="is_parent == False and display_type != 'line_section'">
+
+                                <!-- Hidden fields for logic -->
+                                <control>
+                                    <create string="Add a Component"/>
+                                </control>
+                                <field name="display_type" column_invisible="1"/>
+                                <field name="is_parent" column_invisible="1"/>
+                                <field name="sequence" column_invisible="1"/>
+                                <field name="name"
+                                       string=""
+                                       invisible="display_type != 'line_section'"
+                                       readonly="1"
+                                       width="200px"/>
+
+                                <!-- Product field with custom width -->
+                                <field name="product_id"
+                                       string="Product"
+                                       required="1"
+                                       invisible="display_type == 'line_section'"
+                                       width="200px"/>
+
+                                <!-- Quantity field with smaller width -->
+                                <field name="product_qty"
+                                       string="Quantity"
+                                       required="1"
+                                       invisible="display_type == 'line_section'"
+                                       width="50px"/>
+                            </list>
+                        </field>
+                        <!--                            </page>-->
+                        <!--                        </notebook>-->
+                    </sheet>
+
+                    <footer>
+                        <button name="action_add_components" string="Position New Line" type="object"
+                                class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Wizard Action -->
+        <record id="action_bom_component_wizard" model="ir.actions.act_window">
+            <field name="name">Add BOM Components</field>
+            <field name="res_model">bom.component.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_bom_component_wizard_form"/>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>
