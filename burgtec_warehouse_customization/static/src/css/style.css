@@ -34,3 +34,8 @@
     border-radius: 4px !important;
 }
 
+.o_field_widget[name="component_line_ids"] .o_data_row .o-dropdown,
+.o_field_widget[name="component_line_ids"] .o_data_row td .dropdown {
+    display: none !important;
+}
+

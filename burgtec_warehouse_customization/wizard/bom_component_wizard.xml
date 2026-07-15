@@ -20,7 +20,7 @@
                         </group>
                         <!--                        <notebook>-->
                         <!--                            <page string="Components to Add">-->
-                        <field name="component_line_ids" nolabel="1">
+                        <field name="wizard_component_line_ids" nolabel="1">
                             <list string="Components" editable="bottom"
                                   decoration-info="display_type == 'line_section'"
                                   decoration-warning="is_parent == False and display_type != 'line_section'">

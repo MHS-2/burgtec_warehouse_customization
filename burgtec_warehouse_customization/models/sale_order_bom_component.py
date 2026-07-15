@@ -1,4 +1,4 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError
 
 
@@ -71,7 +71,7 @@ class SaleOrderBOMComponentLine(models.Model):
     is_other_than_bom = fields.Boolean(default=False, store=True)
     sequence = fields.Integer("Sequence")
     # costs
-    live_unit_cost = fields.Float(string='Live Unit Cost')
+    live_unit_cost = fields.Float(string='Live Unit Cost', compute="_compute_live_unit_cost",store=True, readonly=False)
     total_live_cost = fields.Float(string='Total Live Cost', compute='_compute_total_live_cost', store=True)
     margin_live_cost = fields.Float(string='Margin Live Cost', compute='_compute_total_sale_price', store=True)
 
@@ -150,39 +150,67 @@ class SaleOrderBOMComponentLine(models.Model):
         pass
 
     @api.onchange('product_qty')
-    def _onchange_product_qty(self):
-        for parent in self.filtered('is_parent'):
-            children = parent.component_id.component_line_ids.filtered(
-                lambda l: (
-                        l.order_line_id == parent.order_line_id
-                        and not l.is_parent
-                        and not l.display_type
-                )
-            )
-            for child in children:
-                child.originupdate({
-                    'product_qty': child.unit_component_quantity * parent.product_qty,
-                })
+    def onchange_product_qty(self):
+        for rec in self:
+            if not rec.is_parent:
+                continue
+            order_line = rec.order_line_id
+            components = order_line.component_line_ids.filtered(lambda c: not c.display_type)
+            # parent_component_line = components.filtered(lambda c:c.is_parent)
+            child_components =  components.filtered(lambda c: not c.is_parent and c.id != rec._origin.id)
+
+            for child in child_components:
+                child.product_qty = child.unit_component_quantity * self.product_qty
 
 
     @api.onchange('unit_component_quantity')
     def _onchange_unit_component_quantity(self):
-        for child in self.filtered(lambda l: not l.is_parent):
-            parent = child.component_id.component_line_ids.filtered(
-                lambda l: (
-                        l.is_parent
-                        and l.order_line_id == child.order_line_id
-                )
-            )[:1]
-
-            if parent:
-                child.product_qty = parent.product_qty * child.unit_component_quantity
+        parent = self.order_line_id.component_line_ids.filtered(lambda l:l.is_parent)
+        if parent:
+            self.product_qty = parent.product_qty * self.unit_component_quantity
 
 
-    @api.depends('product_qty','live_unit_cost')
+    @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids')
     def _compute_total_live_cost(self):
         for rec in self:
-            rec.total_live_cost = rec.live_unit_cost * rec.product_qty
+            child_components = False
+            parent_component_line = False
+            order_line = rec.order_line_id
+            if not rec.is_parent:
+                rec.total_live_cost = rec.live_unit_cost * rec.product_qty
+                components = order_line.component_line_ids.filtered(lambda c: not c.display_type)
+                parent_component_line = components.filtered(lambda c:c.is_parent)
+                child_components =  components.filtered(lambda c: not c.is_parent and c.id != rec._origin.id)
+                if not parent_component_line.product_qty > 0:
+                    parent_component_line.total_live_cost = 0
+                if parent_component_line.product_qty > 0:
+                    parent_component_line.total_live_cost = sum(child_components.mapped('total_live_cost')) + rec.total_live_cost
+            # if rec.is_parent:
+            #     child_components = rec.search([('order_line_id','=',rec.order_line_id.id),('display_type','=',False),('is_parent','=',False)])
+            #     rec.total_live_cost = sum(child_components.mapped('total_live_cost'))
+    
+    @api.depends('total_live_cost')
+    def _compute_live_unit_cost(self):
+        for rec in self:
+            if rec.is_parent:
+                rec.live_unit_cost = rec.total_live_cost / rec.product_qty if rec.product_qty > 0 else 0
+            else:
+                continue
+
+
+    
+
+    def unlink(self):
+        if self.is_parent:
+            raise UserError(_('You are not allowed to delete parent line. If you want to go delete its order line from sales order instead!'))
+        bom_component = self.component_id
+        order_id = bom_component.order_id
+        res = super().unlink()
+        order_lines = order_id.order_line.sorted(lambda o:o.sequence)
+        order_id.set_sequences(order_lines,10) # 10 sequence is used by default.
+
+
+
 
 
 

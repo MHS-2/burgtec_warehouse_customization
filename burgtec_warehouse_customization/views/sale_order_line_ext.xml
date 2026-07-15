@@ -23,6 +23,7 @@
                                options="{'no_open':1,'no_create':1}"
                                readonly="parent.state == 'sale'"
                                force_save="1" style="color:green;" required="1"/>
+                        <field name="sequence"/>
                         <field name="product_qty"
                                width="60px"
                                readonly="parent.state == 'sale'" force_save="1"/>

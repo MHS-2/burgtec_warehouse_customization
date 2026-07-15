@@ -9,20 +9,20 @@ class SaleOrderExt(models.Model):
         string='BOM Components'
     )
 
-    next_sequence = fields.Integer(string='Next Sequence', compute='_compute_next_sequence', store=True)
+    next_sequence = fields.Integer(string='Next Sequence',default="10")
 
-    @api.depends('bom_component_id.component_line_ids', 'order_line')
-    def _compute_next_sequence(self):
-        for rec in self:
-            bom_component_id = rec.bom_component_id
-            component_line_ids = bom_component_id.component_line_ids.sorted(lambda l: l.sequence)
-            order_line = rec.order_line.sorted(lambda l: l.sequence)
-            if not component_line_ids and not order_line:
-                rec.next_sequence = 10
-            if not component_line_ids and order_line:
-                rec.next_sequence = order_line[-1].sequence + 2
-            if component_line_ids:
-                rec.next_sequence = component_line_ids[-1].sequence + 2
+    # @api.depends('bom_component_id.component_line_ids', 'order_line')
+    # def _compute_next_sequence(self):
+    #     for rec in self:
+    #         bom_component_id = rec.bom_component_id
+    #         component_line_ids = bom_component_id.component_line_ids.sorted(lambda l: l.sequence)
+    #         order_line = rec.order_line.sorted(lambda l: l.sequence)
+    #         if not component_line_ids and not order_line:
+    #             rec.next_sequence = 10
+    #         if not component_line_ids and order_line:
+    #             rec.next_sequence = order_line[-1].sequence + 2
+    #         if component_line_ids:
+    #             rec.next_sequence = component_line_ids[-1].sequence + 2
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -46,6 +46,20 @@ class SaleOrderExt(models.Model):
             'target': 'current',
 
         }
+    
+    def set_sequences(self, order_lines, seq):
+        bom_seq = seq - 1 # 9 due to display line.
+        # new_sequence = seq + 1
+        child_boms = False
+        for order_line in order_lines:
+            child_boms = order_line.component_line_ids
+            if child_boms:
+                for child in child_boms:
+                    if child.is_parent:
+                        order_line.sequence = bom_seq
+                    child.sequence = bom_seq
+                    bom_seq += 1
+        self.next_sequence = bom_seq+1 # Gap of 2 always because of display line before parent line.
 
 
 class SaleOrderLinesExt(models.Model):
@@ -83,7 +97,8 @@ class SaleOrderLinesExt(models.Model):
             order_id = order_line.order_id
             bom_component = order_id.bom_component_id
             # Child sequence 1 ahead then parent's
-            seq = order_line.sequence
+            # seq = order_line.sequence
+            seq = order_id.next_sequence
             bom_line_sequence = seq - 1
             kit_bom_id = order_line.kit_bom_id
             order_line_product_qty = order_line.product_uom_qty
@@ -99,6 +114,7 @@ class SaleOrderLinesExt(models.Model):
             vals = {}
             # Parent Line
             bom_line_sequence += 1
+            order_line.sequence = bom_line_sequence
             vals = {
                 'component_id': bom_component.id,
                 'is_parent': True,
@@ -153,9 +169,12 @@ class SaleOrderLinesExt(models.Model):
                 # If order line after this one.
                 other_order_lines = order_id.order_line.sorted(lambda o: o.sequence).filtered(
                     lambda l: l.sequence > order_line.sequence and l.id != order_line.id)
+                if not other_order_lines:
+                    order_id.next_sequence = bom_line_sequence+2
                 if other_order_lines:
                     order_line.set_sequences(other_order_lines, bom_line_sequence)
                 order_line.component_line_ids = list_vals
+                list_vals = []
 
 
 
@@ -178,10 +197,11 @@ class SaleOrderLinesExt(models.Model):
                     new_sequence += 1
                     child.sequence = new_sequence
                 new_sequence += 1
+        self.order_id.next_sequence = new_sequence+1
 
-    def create(self, vals_list):
-        res = super(SaleOrderLinesExt, self).create(vals_list)
-        for line in res:
-            line.sequence = line.order_id.next_sequence
-            line.order_id._compute_next_sequence()
-        return res
+    # def create(self, vals_list):
+    #     res = super(SaleOrderLinesExt, self).create(vals_list)
+    #     for line in res:
+    #         line.sequence = line.order_id.next_sequence
+    #         # line.order_id._compute_next_sequence()
+    #     return res

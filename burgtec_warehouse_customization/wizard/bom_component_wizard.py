@@ -8,13 +8,14 @@ class BOMComponentWizard(models.TransientModel):
     _description = 'BOM Component Wizard'
 
     # Only relation to sale.order.bom.component
+    order_line_id = fields.Many2one('sale.order.line')
     component_id = fields.Many2one('sale.order.bom.component', string='Component', readonly=True)
     parent_line_sequence = fields.Integer()
     parent_product_id = fields.Many2one('product.template')
     parent_line_id = Many2one('sale.order.bom.component.line', readonly=True)
 
     # Dynamic fields for adding components
-    component_line_ids = fields.One2many(
+    wizard_component_line_ids = fields.One2many(
         'bom.component.wizard.line',
         'wizard_id',
         string='Components to Add'
@@ -29,6 +30,7 @@ class BOMComponentWizard(models.TransientModel):
             if active_id:
                 parent_line = self.env['sale.order.bom.component.line'].browse(active_id)
                 res.update({
+                    'order_line_id': parent_line.order_line_id.id,
                     'component_id': parent_line.component_id.id if parent_line.component_id else False,
                     'parent_product_id': parent_line.product_id.product_tmpl_id.id if parent_line.product_id else False,
                     'parent_line_sequence': parent_line.sequence,
@@ -40,16 +42,17 @@ class BOMComponentWizard(models.TransientModel):
                     'name': parent_line.product_id.name,
                     'section_name': parent_line.product_id.name,
                 }))
-                res['component_line_ids'] = component_lines
+                res['wizard_component_line_ids'] = component_lines
         return res
 
     def action_add_components(self):
         """Add selected components to the BOM"""
-        if not self.component_line_ids:
+        added_components_ids = []
+        if not self.wizard_component_line_ids:
             raise ValidationError("Please add at least one component.")
 
         # Filter out section lines and get only actual component lines
-        component_lines_to_add = self.component_line_ids.filtered(
+        component_lines_to_add = self.wizard_component_line_ids.filtered(
             lambda line: line.display_type != 'line_section' and line.product_id and line.product_qty > 0
         )
 
@@ -57,7 +60,7 @@ class BOMComponentWizard(models.TransientModel):
             raise ValidationError("Please add at least one valid component.")
 
         parent_bom_line_id = self.parent_line_id
-        child_lines = self.component_id.component_line_ids.filtered(
+        child_lines = self.order_line_id.component_line_ids.filtered(
             lambda l: not l.is_parent
                       and l.order_line_id == parent_bom_line_id.order_line_id)
         child_product_ids = child_lines.mapped('product_id')
@@ -72,45 +75,46 @@ class BOMComponentWizard(models.TransientModel):
             )
 
         # Count how many lines we're adding
-        lines_to_add_count = len(component_lines_to_add)
+        # lines_to_add_count = len(component_lines_to_add)
 
         # Shift existing lines down to make room for new lines
         # Find all lines that come after the parent line
-        existing_lines = self.env['sale.order.bom.component.line'].search([
-            ('component_id', '=', self.component_id.id),
-            ('sequence', '>', self.parent_line_sequence)
-        ])
+        
+        # existing_lines = self.env['sale.order.bom.component.line'].search([
+        #     ('component_id', '=', self.component_id.id),
+        #     ('sequence', '>', self.parent_line_sequence)
+        # ])
 
         # Update sequences of existing lines (shift them down)
-        for line in existing_lines:
-            line.sequence += lines_to_add_count
+        # for line in existing_lines:
+        #     line.sequence += lines_to_add_count
 
         # Create new component lines with sequential numbering
         sequence_counter = self.parent_line_sequence + 1
 
         for line in component_lines_to_add:
-            self.env['sale.order.bom.component.line'].create({
-                'component_id': self.component_id.id,
-                # 'parent_product_id': self.parent_product_id.id if self.parent_product_id else False,
-                'order_line_id': self.parent_line_id.order_line_id.id if self.parent_line_id.order_line_id else False,
-                'product_id': line.product_id.id,
-                'product_qty': line.product_qty * self.parent_line_id.product_qty,
-                # Fixed: Use list_price instead of price_unit
-                # 'unit_sale_price' : line.product_id.list_price,
-                # 'total_sale_price': (line.product_qty * self.parent_line_id.product_qty) * line.product_id.list_price,
-                # 'system_cost_per_unit': (line.product_qty * self.parent_line_id.product_qty) * (
-                #         line.product_id.standard_price or 0.0),
-                'live_unit_cost': line.product_id.standard_price or 0.0,
-                'total_live_cost': (line.product_qty * self.parent_line_id.product_qty) * (
-                        line.product_id.standard_price or 0.0),
-                'is_parent': False,
-                'is_other_than_bom': True,
-                'sequence': sequence_counter,
-                'supplier_id': self.get_product_suppiler(line.product_id),
+            res = self.env['sale.order.bom.component.line'].create({
+                    'component_id': self.component_id.id,
+                    'order_line_id': self.parent_line_id.order_line_id.id if self.parent_line_id.order_line_id else False,
+                    'product_id': line.product_id.id,
+                    'product_qty': line.product_qty * self.parent_line_id.product_qty if self.parent_line_id.product_qty else line.product_qty,
+                    'unit_component_quantity': line.product_qty,
+                    'live_unit_cost': line.product_id.standard_price or 0.0,
+                    'total_live_cost': (line.product_qty * self.parent_line_id.product_qty) * (
+                            line.product_id.standard_price or 0.0),
+                    'is_parent': False,
+                    'is_other_than_bom': True,
+                    'sequence': sequence_counter,
+                    'supplier_id': self.get_product_suppiler(line.product_id),
 
-            })
+                })
+            added_components_ids.append(res.id)
             sequence_counter += 1
-        # self.component_id.onchange_component_line_ids()
+        next_lines = self.component_id.component_line_ids.sorted(lambda c:c.sequence).filtered(lambda l:l.sequence > self.parent_line_sequence and l.id not in added_components_ids)
+        for line in next_lines:
+            line.sequence = sequence_counter
+            sequence_counter += 1
+        self.component_id.order_id.next_sequence = sequence_counter + 1
 
         return {'type': 'ir.actions.act_window_close'}
 
@@ -128,7 +132,7 @@ class BOMComponentWizardLine(models.TransientModel):
     product_id = fields.Many2one(
         'product.product',
         string='Component',
-        domain="[('product_tmpl_id.custom_product_type', '=', 'components')]"
+        domain="[('product_tmpl_id.custom_product_type', '=', 'component')]"
     )
 
     # Display type and sequence (following the reference pattern)

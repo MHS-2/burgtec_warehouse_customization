@@ -18,6 +18,7 @@
                                    mode="list"
                                    no_label="True"
                                    readonly="state == 'sale'"
+                                   options="{'subsections': False}"
                             >
                                 <list class="no_reorder"
                                       create="0"
@@ -28,7 +29,6 @@
                                       decoration-info="is_parent == False">
 
                                     <!-- Section header fields -->
-
                                     <field name="sequence" widget="handle" invisible="1"/>
                                     <field name="is_auto_generated" column_invisible="1"/>
                                     <field name="is_parent" column_invisible="1" force_save="1"/>
@@ -50,8 +50,9 @@
 
                                     <field name="product_id" width="400px"
                                            options="{'no_open':1,'no_create':1}"
-                                           readonly="parent.state == 'sale'"
+                                           readonly="1"
                                            force_save="1" style="color:green;" required="1"/>
+                                    <field name="sequence"/>
                                     <field name="product_qty"
                                            width="60px"
                                            class="text-center"
