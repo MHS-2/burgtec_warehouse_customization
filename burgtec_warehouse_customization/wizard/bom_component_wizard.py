@@ -132,7 +132,7 @@ class BOMComponentWizardLine(models.TransientModel):
     product_id = fields.Many2one(
         'product.product',
         string='Component',
-        domain="[('product_tmpl_id.custom_product_type', '=', 'component')]"
+        domain="[('custom_variant_type','=','component'),]"
     )
 
     # Display type and sequence (following the reference pattern)

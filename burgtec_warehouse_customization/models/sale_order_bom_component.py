@@ -201,13 +201,15 @@ class SaleOrderBOMComponentLine(models.Model):
     
 
     def unlink(self):
-        if self.is_parent:
-            raise UserError(_('You are not allowed to delete parent line. If you want to go delete its order line from sales order instead!'))
-        bom_component = self.component_id
-        order_id = bom_component.order_id
+        for rec in self:
+            if rec.is_parent:
+                raise UserError(_('You are not allowed to delete parent line. If you want to go delete its order line from sales order instead!'))
+            bom_component = rec.component_id
+            order_id = bom_component.order_id
         res = super().unlink()
         order_lines = order_id.order_line.sorted(lambda o:o.sequence)
         order_id.set_sequences(order_lines,10) # 10 sequence is used by default.
+        return res
 
 
 

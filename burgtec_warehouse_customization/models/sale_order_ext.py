@@ -1,4 +1,5 @@
 from odoo import fields, models, api, Command, _
+from odoo.exceptions import UserError
 
 
 class SaleOrderExt(models.Model):
@@ -205,3 +206,14 @@ class SaleOrderLinesExt(models.Model):
     #         line.sequence = line.order_id.next_sequence
     #         # line.order_id._compute_next_sequence()
     #     return res
+
+    def unlink(self):
+        for rec in self:
+            order_id = rec.order_id
+        res = super().unlink()
+        order_lines = order_id.order_line.sorted(lambda o:o.sequence)
+        if not order_lines:
+            order_id.next_sequence = 10
+            return res
+        order_id.set_sequences(order_lines,10) # 10 sequence is used by default.
+        return res
