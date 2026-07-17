@@ -29,7 +29,7 @@
                                       decoration-info="is_parent == False">
 
                                     <!-- Section header fields -->
-                                    <field name="sequence" widget="handle" invisible="1"/>
+                                    <field name="sequence" readonly="1" optional="hide"/>
                                     <field name="is_auto_generated" column_invisible="1"/>
                                     <field name="is_parent" column_invisible="1" force_save="1"/>
                                     <field name="name" string="" readonly="1"/>
@@ -52,7 +52,6 @@
                                            options="{'no_open':1,'no_create':1}"
                                            readonly="1"
                                            force_save="1" style="color:green;" required="1"/>
-                                    <field name="sequence"/>
                                     <field name="product_qty"
                                            width="60px"
                                            class="text-center"
@@ -83,6 +82,12 @@
 
                                 </list>
                             </field>
+                        </page>
+                        <page name="bom_lines_total" string="Bom Lines Total">
+                            <group>
+                                <field name="total_parent_product_sale_price"/>
+                                <field name="total_parent_live_unit_cost"/>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>

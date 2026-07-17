@@ -26,6 +26,10 @@
             <xpath expr="//page[@name='other_information']//field[@name='source_id']" position="after">
                 <field name="next_sequence"/>
             </xpath>
+
+            <xpath expr="//field[@name='order_line']//list//field[@name='sequence']" position="replace">
+                <field name="sequence" invisible="combo_item_id" readonly="1" optional="hide"/>
+            </xpath>
         </field>
     </record>
 </odoo>

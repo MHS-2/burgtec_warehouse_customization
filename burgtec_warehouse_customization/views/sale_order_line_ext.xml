@@ -5,53 +5,59 @@
         <field name="model">sale.order.line</field>
         <field name="inherit_id" ref="sale.sale_order_line_view_form_readonly"/>
         <field name="arch" type="xml">
-            <xpath expr="//group" position="after">
-                <field name="sequence"/>
-                <field name="component_line_ids" no_label="True" widget="section_and_note_one2many"
-                       string="Child Component">
-                    <list create="0">
-                        <!-- Section header fields -->
-                        <field name="sequence" widget="handle" invisible="1"/>
-                        <field name="display_type" column_invisible="1" string=" "/>
-                        <field name="name" readonly="1"/>
 
-                        <field name="is_auto_generated" column_invisible="1"/>
+              <xpath expr="//field[@name='product_uom_qty']" position="after">
+                     <field name="sequence"/>
+              </xpath>
+              <xpath expr="//field[@name='price_tax']" position="after">
+                     <field name="total_live_unit_cost"/>
+              </xpath>
+              <xpath expr="//group" position="after">
+                     <field name="component_line_ids" no_label="True" widget="section_and_note_one2many"
+                            string="Child Component">
+                     <list create="0">
+                            <!-- Section header fields -->
+                            <field name="sequence" widget="handle" invisible="1"/>
+                            <field name="display_type" column_invisible="1" string=" "/>
+                            <field name="name" readonly="1"/>
 
-                        <field name="is_parent" column_invisible="1" force_save="1"/>
+                            <field name="is_auto_generated" column_invisible="1"/>
 
-                        <field name="product_id" width="500px"
-                               options="{'no_open':1,'no_create':1}"
-                               readonly="parent.state == 'sale'"
-                               force_save="1" style="color:green;" required="1"/>
-                        <field name="sequence"/>
-                        <field name="product_qty"
-                               width="60px"
-                               readonly="parent.state == 'sale'" force_save="1"/>
-                        <field name="unit_component_quantity" width="190px" class="text-center"
-                              force_save="1"/>
+                            <field name="is_parent" column_invisible="1" force_save="1"/>
 
-                        <field name="unit_sale_price" width="100px"
-                               readonly="parent.state == 'sale'"
-                               force_save="1"/>
-                        <field name="total_sale_price" width="100px"
-                               readonly="parent.state == 'sale' or is_parent"
-                               force_save="1"/>
+                            <field name="product_id" width="500px"
+                                   options="{'no_open':1,'no_create':1}"
+                                   readonly="parent.state == 'sale'"
+                                   force_save="1" style="color:green;" required="1"/>
+                            <field name="sequence"/>
+                            <field name="product_qty"
+                                   width="60px"
+                                   readonly="parent.state == 'sale'" force_save="1"/>
+                            <field name="unit_component_quantity" width="190px" class="text-center"
+                                   force_save="1"/>
 
-                        <field name="live_unit_cost" readonly="is_parent" force_save="1" optional="show"
-                               decoration-warning="1 == 1" decoration-bf="1 == 1"/>
-                        <field name="total_live_cost" width="100px"
-                               readonly="1"
-                               force_save="1" decoration-warning="1 == 1" optional="hide"/>
-                        <field name="supplier_id"
-                               readonly="parent.state == 'sale'" options="{'no_create':1}" optional="hide"/>
-                        <field name="margin_live_cost"
-                               readonly="1" force_save="1" invisible="not is_parent" decoration-warning="1 == 1"
-                               optional="hide"/>
+                            <field name="unit_sale_price" width="100px"
+                                   readonly="parent.state == 'sale'"
+                                   force_save="1"/>
+                            <field name="total_sale_price" width="100px"
+                                   readonly="parent.state == 'sale' or is_parent"
+                                   force_save="1"/>
 
-                    </list>
-                </field>
+                            <field name="live_unit_cost" readonly="is_parent" force_save="1" optional="show"
+                                   decoration-warning="1 == 1" decoration-bf="1 == 1"/>
+                            <field name="total_live_cost" width="100px"
+                                   readonly="1"
+                                   force_save="1" decoration-warning="1 == 1" optional="hide"/>
+                            <field name="supplier_id"
+                                   readonly="parent.state == 'sale'" options="{'no_create':1}" optional="hide"/>
+                            <field name="margin_live_cost"
+                                   readonly="1" force_save="1" invisible="not is_parent" decoration-warning="1 == 1"
+                                   optional="hide"/>
 
-            </xpath>
+                     </list>
+                     </field>
+
+              </xpath>
         </field>
     </record>
 </odoo>
