@@ -27,6 +27,16 @@
                 <field name="next_sequence"/>
             </xpath>
 
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="invisible">not bom_component_id</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']" position="before">
+                <div class="alert alert-warning w-100 d-flex align-items-center gap-1" invisible="bom_component_id"  role="alert">
+                    <span>Save Sales Order To Add Products and their BOM Kits.</span>
+                </div>
+            </xpath>
+
             <xpath expr="//field[@name='order_line']//list//field[@name='sequence']" position="replace">
                 <field name="sequence" invisible="combo_item_id" readonly="1" optional="hide"/>
             </xpath>

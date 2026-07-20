@@ -62,10 +62,10 @@
                                            readonly="parent.state == 'sale' or is_parent or display_type" force_save="1"/>
 
                                     <field name="unit_sale_price" width="100px" class="text-center"
-                                           readonly="parent.state == 'sale'"
+                                           readonly="parent.state == 'sale' or not is_parent"
                                            force_save="1"/>
                                     <field name="total_sale_price" width="100px" class="text-center"
-                                           readonly="parent.state == 'sale' or is_parent"
+                                           readonly="parent.state == 'sale' or is_parent or not is_parent"
                                            force_save="1"/>
 
                                     <field name="live_unit_cost" readonly="is_parent" force_save="1" optional="show"

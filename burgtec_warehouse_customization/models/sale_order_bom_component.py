@@ -90,7 +90,7 @@ class SaleOrderBOMComponentLine(models.Model):
     is_other_than_bom = fields.Boolean(default=False, store=True)
     sequence = fields.Integer("Sequence")
     # costs
-    live_unit_cost = fields.Monetary(currency_field='currency_id', string='Live Unit Cost', compute="_compute_live_unit_cost",store=True, readonly=False)
+    live_unit_cost = fields.Monetary(currency_field='currency_id', string='Live Unit Cost')
     total_live_cost = fields.Monetary(currency_field='currency_id', string='Total Live Cost', compute='_compute_total_live_cost', store=True)
     margin_live_cost = fields.Monetary(currency_field='currency_id', string='Margin Live Cost', compute='_compute_total_sale_price', store=True)
 
@@ -176,28 +176,25 @@ class SaleOrderBOMComponentLine(models.Model):
         pass
 
 
-    @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids','order_line_id.component_line_ids.live_unit_cost')
+    @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids','order_line_id.component_line_ids.live_unit_cost', 'order_line_id.component_line_ids.product_qty')
     def _compute_total_live_cost(self):
         for rec in self:
             child_components = False
-            parent_component_line = False
             order_line = rec.order_line_id
+            if rec.display_type:
+                rec.total_live_cost = 0
             if rec.is_parent:
                 child_components =  order_line.component_line_ids.filtered(lambda c: not c.is_parent and not c.display_type)
                 if not rec.product_qty > 0:
                     rec.total_live_cost = 0
                 if rec.product_qty > 0:
+                    for line in child_components:
+                        line.total_live_cost = line.live_unit_cost * line.product_qty
                     rec.total_live_cost = sum(child_components.mapped('total_live_cost'))
+                    rec.live_unit_cost = rec.total_live_cost / rec.product_qty if rec.product_qty > 0 else 0
+
             if not rec.is_parent:
                 rec.total_live_cost = rec.live_unit_cost * rec.product_qty
-    
-    @api.depends('total_live_cost','product_qty','order_line_id.component_line_ids')
-    def _compute_live_unit_cost(self):
-        for rec in self:
-            if rec.is_parent:
-                rec.live_unit_cost = rec.total_live_cost / rec.product_qty if rec.product_qty > 0 else 0
-            else:
-                continue
 
     def unlink(self):
         for rec in self:
