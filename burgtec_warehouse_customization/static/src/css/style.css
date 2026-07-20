@@ -39,3 +39,39 @@
     display: none !important;
 }
 
+.o_margin_header_panel {
+    display: flex;
+    align-items: center;
+    margin-left: auto;  /* pushes element to the right end */
+    padding: 4px 12px;
+    background: #ffffff;
+    border: 2px solid #921872;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.o_margin_header_table {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.2;
+
+    .o_mh_label {
+        font-weight: 300;
+        color: #921872;
+        font-size: medium;
+        padding-right: 4px;
+    }
+
+    .o_mh_value {
+        font-weight: 300;
+         color: #921872;
+         font-size: medium;
+        padding-right: 4px;
+    }
+
+    .o_mh_sep {
+        color: #921872;
+        padding: 0 6px;
+    }
+}
+

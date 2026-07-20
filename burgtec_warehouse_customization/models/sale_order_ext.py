@@ -1,3 +1,5 @@
+from markupsafe import Markup
+
 from odoo import fields, models, api, Command, _
 from odoo.exceptions import UserError
 
@@ -12,9 +14,11 @@ class SaleOrderExt(models.Model):
 
     next_sequence = fields.Integer(string='Next Sequence',default="10")
 
-    # live_unit_cost = fields.Float(compute='_compute_multi_costs', store=True)
-    # percentage_margin_live_cost = fields.Float(compute='_compute_multi_costs', store=True)
-    # percentage_markup_live_cost = fields.Float(compute='_compute_multi_costs', store=True)
+    total_live_unit_cost = fields.Monetary(currency_field='currency_id',compute='_compute_total_live_unit_cost', store=True)
+    gp_cost = fields.Monetary(currency_field='currency_id',compute='_compute_multi_costs', store=True)
+    percentage_margin_live_cost = fields.Float(compute='_compute_multi_costs', store=True)
+    percentage_markup_live_cost = fields.Float(compute='_compute_multi_costs', store=True)
+    floating_table_html = fields.Html(compute="_compute_floating_table_html")
 
 
     @api.model_create_multi
@@ -55,10 +59,60 @@ class SaleOrderExt(models.Model):
         self.next_sequence = bom_seq+1 # Gap of 2 always because of display line before parent line.
     
 
-    # @api.depends('order_line','bom_component_id','bom_component_id.total_parent_live_unit_cost','bom_component_id.total_parent_product_sale_price',)
-    # def _compute_multi_costs(self):
-    #     for record in self:
-    #         pass
+    @api.depends('order_line','order_line.total_live_unit_cost')
+    def _compute_total_live_unit_cost(self):
+        for record in self:
+            order_lines = record.order_line
+            if not order_lines:
+                record.total_live_unit_cost = 0.0
+            if order_lines:
+                record.total_live_unit_cost = sum(order_lines.mapped('total_live_unit_cost'))
+    
+    @api.depends('total_live_unit_cost','amount_untaxed')
+    def _compute_multi_costs(self):
+        for record in self:
+            total_live_cost = record.total_live_unit_cost
+            amount_untaxed = record.amount_untaxed
+            amount_cost_diff = amount_untaxed - total_live_cost
+            # cost
+            record.gp_cost =  amount_cost_diff
+
+            # Margin %
+            record.percentage_margin_live_cost = (amount_cost_diff) / amount_untaxed if amount_untaxed else 0.0
+
+            # Markup %
+            record.percentage_markup_live_cost = (
+                    (amount_cost_diff) / total_live_cost
+                    if total_live_cost else 0.0
+                )
+    
+    def _compute_floating_table_html(self):
+        for record in self:
+            table_code = Markup("""
+            <div class="o_margin_header_panel border">
+                <table class="o_margin_header_table">
+                    <tr>
+                        <td class="o_mh_label">Total$</td>
+                        <td class="o_mh_value" data-field="total_untaxed_amount">{untaxed_amount}</td>
+                        <td class="o_mh_sep">┃</td>
+                        <td class="o_mh_label">GP$</td>
+                        <td class="o_mh_value" data-field="gp">{gp_cost}</td>
+                        <td class="o_mh_sep">┃</td>
+                        <td class="o_mh_label">Margin</td>
+                        <td class="o_mh_value" data-field="margin">{margin}%</td>
+                        <td class="o_mh_sep">┃</td>
+                        <td class="o_mh_label">Markup</td>
+                        <td class="o_mh_value" data-field="markup">{markup}%</td>
+                    
+                    </tr>
+                </table>
+            </div>
+            """).format(untaxed_amount=record.amount_untaxed,gp_cost=record.gp_cost,margin=round(record.percentage_margin_live_cost*100,2),markup=round(record.percentage_markup_live_cost*100,2))
+
+            record.floating_table_html = table_code
+
+
+
 
 
 class SaleOrderLinesExt(models.Model):
@@ -73,9 +127,9 @@ class SaleOrderLinesExt(models.Model):
         'order_line_id',
     )
 
-    total_live_unit_cost = fields.Float(compute='_compute_multi_total_from_bom_lines', store=True)
+    total_live_unit_cost = fields.Monetary(currency_field='currency_id',compute='_compute_multi_total_from_bom_lines', store=True)
 
-    @api.depends('component_line_ids','component_line_ids.total_live_cost',)
+    @api.depends('component_line_ids','component_line_ids.total_live_cost', 'component_line_ids.live_unit_cost',)
     def _compute_multi_total_from_bom_lines(self):
         for rec in self:
             parent_line = rec.component_line_ids.filtered(lambda l:l.is_parent)

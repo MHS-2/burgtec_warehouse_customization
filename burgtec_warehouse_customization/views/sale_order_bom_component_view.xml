@@ -10,6 +10,7 @@
                     <group>
                         <field name="order_id" readonly="1" invisible="1"/>
                         <field name="state" readonly="1" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
                     </group>
                     <notebook>
                         <page name="bom_lines" string="BOM Lines">
@@ -31,6 +32,7 @@
                                     <!-- Section header fields -->
                                     <field name="sequence" readonly="1" optional="hide"/>
                                     <field name="is_auto_generated" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
                                     <field name="is_parent" column_invisible="1" force_save="1"/>
                                     <field name="name" string="" readonly="1"/>
                                     <button name="action_open_add_components_wizard"

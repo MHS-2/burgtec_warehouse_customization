@@ -16,10 +16,27 @@ class SaleOrderBomComponent(models.Model):
         copy=True
     )
     # computed cost
-    total_parent_product_sale_price = fields.Float(compute='_compute_multi_total_from_bom_lines', store=True)
-    total_parent_live_unit_cost = fields.Float(compute='_compute_multi_total_from_bom_lines', store=True)
+    total_parent_product_sale_price = fields.Monetary(currency_field='currency_id',compute='_compute_multi_total_from_bom_lines', store=True)
+    total_parent_live_unit_cost = fields.Monetary(currency_field='currency_id',compute='_compute_multi_total_from_bom_lines', store=True)
 
     component_state_id = fields.Many2one('bom.component.state', copy=False)
+
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        compute='_compute_currency_id',
+        store=True,
+        precompute=True,
+        ondelete='restrict'
+    )
+
+    @api.depends('order_id','order_id.currency_id')
+    def _compute_currency_id(self):
+        for rec in self:
+            order = rec.order_id
+            if not order:
+                rec.currency_id = False
+            if order:
+                rec.currency_id = order.currency_id
 
     @api.depends('component_line_ids.total_sale_price', 'component_line_ids.total_live_cost')
     def _compute_multi_total_from_bom_lines(self):
@@ -61,8 +78,8 @@ class SaleOrderBOMComponentLine(models.Model):
     product_qty = fields.Float(string='Quantity', digits='Product Quantity',compute="compute_product_qty", inverse="_inverse_product_qty", store=True)
     # product_uom_qty = fields.Float(related="order_line_id.product_uom_qty",store=True)
     unit_component_quantity = fields.Float(string='Unit Component Quantity', digits='Product Unit Quantity',default=1)
-    unit_sale_price = fields.Float(string='Unit Sale Price')
-    total_sale_price = fields.Float(string="Total Sale Price", compute='_compute_total_sale_price', store=True)
+    unit_sale_price = fields.Monetary(currency_field='currency_id',string='Unit Sale Price', compute='_compute_unit_sale_price', inverse="_inverse_unit_sale_price", store=True, readonly=False)
+    total_sale_price = fields.Monetary(currency_field='currency_id',string="Total Sale Price", compute='_compute_total_sale_price', store=True)
     supplier_id = fields.Many2one('res.partner', string='Supplier')
     is_parent = fields.Boolean(string="Is Parent")
     is_auto_generated = fields.Boolean(
@@ -73,9 +90,9 @@ class SaleOrderBOMComponentLine(models.Model):
     is_other_than_bom = fields.Boolean(default=False, store=True)
     sequence = fields.Integer("Sequence")
     # costs
-    live_unit_cost = fields.Float(string='Live Unit Cost', compute="_compute_live_unit_cost",store=True, readonly=False)
-    total_live_cost = fields.Float(string='Total Live Cost', compute='_compute_total_live_cost', store=True)
-    margin_live_cost = fields.Float(string='Margin Live Cost', compute='_compute_total_sale_price', store=True)
+    live_unit_cost = fields.Monetary(currency_field='currency_id', string='Live Unit Cost', compute="_compute_live_unit_cost",store=True, readonly=False)
+    total_live_cost = fields.Monetary(currency_field='currency_id', string='Total Live Cost', compute='_compute_total_live_cost', store=True)
+    margin_live_cost = fields.Monetary(currency_field='currency_id', string='Margin Live Cost', compute='_compute_total_sale_price', store=True)
 
     display_type = fields.Selection([
         ('line_section', "Section"),
@@ -87,6 +104,23 @@ class SaleOrderBOMComponentLine(models.Model):
         compute='_compute_unit_margin',
     )
 
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        compute='_compute_currency_id',
+        store=True,
+        precompute=True,
+        ondelete='restrict'
+    )
+
+    @api.depends('component_id','component_id.currency_id')
+    def _compute_currency_id(self):
+        for rec in self:
+            component = rec.component_id
+            if not component:
+                rec.currency_id = False
+            if component:
+                rec.currency_id = component.currency_id
+
     @api.depends('margin_live_cost', 'product_qty', 'is_parent')
     def _compute_unit_margin(self):
         for line in self:
@@ -94,6 +128,20 @@ class SaleOrderBOMComponentLine(models.Model):
                 line.unit_margin = line.margin_live_cost / line.product_qty
             else:
                 line.unit_margin = 0.0
+    
+    @api.depends('order_line_id.price_unit')
+    def _compute_unit_sale_price(self):
+        for record in self:
+            order_line = record.order_line_id
+            if not record.is_parent:
+                record.unit_sale_price = 0.0
+            if record.is_parent:    
+                record.unit_sale_price = order_line.price_unit
+    
+    def _inverse_unit_sale_price(self):
+        for rec in self:
+            if rec.is_parent:
+                rec.order_line_id.price_unit = rec.unit_sale_price
 
     @api.depends('product_qty', 'unit_sale_price', 'total_live_cost')
     def _compute_total_sale_price(self):
@@ -128,7 +176,7 @@ class SaleOrderBOMComponentLine(models.Model):
         pass
 
 
-    @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids')
+    @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids','order_line_id.component_line_ids.live_unit_cost')
     def _compute_total_live_cost(self):
         for rec in self:
             child_components = False
@@ -178,6 +226,7 @@ class SaleOrderBOMComponentLine(models.Model):
         for rec in self:
             if rec.is_parent:
                 rec.order_line_id.product_uom_qty = rec.product_qty
+
     
     @api.constrains('unit_component_quantity')
     def check_unit_component_quantity(self):

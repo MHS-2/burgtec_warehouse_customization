@@ -30,6 +30,26 @@
             <xpath expr="//field[@name='order_line']//list//field[@name='sequence']" position="replace">
                 <field name="sequence" invisible="combo_item_id" readonly="1" optional="hide"/>
             </xpath>
+
+            <xpath expr="//page[@name='order_lines']" position="after">
+                <page name="order_lines_total" string="BOM Totals">
+                    <group>
+                        <field name="amount_untaxed"/>
+                        <field name="total_live_unit_cost"/>
+                        <field name="gp_cost"/>
+                        <field name="percentage_margin_live_cost" widget="percentage"/>
+                        <field name="percentage_markup_live_cost" widget="percentage"/>
+                    </group>
+                </page>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']//list//field[@name='price_total']" position="after">
+                <field name="total_live_unit_cost" width="155px" optional="hide"/>
+            </xpath>
+
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="floating_table_html" widget="html"/>
+            </xpath>
         </field>
     </record>
 </odoo>
