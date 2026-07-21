@@ -40,15 +40,15 @@
                                             type="object"
                                             class="btn-primary btn-sm"
                                             icon="fa-plus"
-                                            invisible="not is_parent"
+                                            invisible="not is_parent or parent.state == 'sale'"
                                             help="Add components to this parent line"/>
-                                    <!-- <button name="action_open_update_parent_line"
+                                    <button name="action_open_sale_order_line"
                                             string="Product"
                                             type="object"
                                             class="btn-primary btn-sm"
                                             icon="fa-pencil"
-                                            invisible="not is_parent"
-                                            help=" components to this parent line"/> -->
+                                            invisible="not is_parent or parent.state == 'sale'"
+                                            help="Opens Sale Order Line (Parent Line)"/>
 
                                     <field name="product_id" width="400px"
                                            options="{'no_open':1,'no_create':1}"

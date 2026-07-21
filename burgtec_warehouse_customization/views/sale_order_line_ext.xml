@@ -60,4 +60,18 @@
               </xpath>
         </field>
     </record>
+
+    <record id="burgtec_warehouse_customiation_view_sale_order_line_from_bom_line_form" model="ir.ui.view">
+       <field name="name">burgtec.warehouse.customiation.view.sale.order.line.from.bom.line.form</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+              <form>
+                     <sheet>
+                            <group>
+                                   <field name="name"/>
+                            </group>
+                     </sheet> 
+              </form>
+        </field>
+    </record>
 </odoo>

@@ -172,8 +172,21 @@ class SaleOrderBOMComponentLine(models.Model):
             }
         }
 
-    def action_open_update_parent_line(self):
-        pass
+    def action_open_sale_order_line(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Edit Parent Line',
+            'res_model': 'sale.order.line',
+            'res_id': self.order_line_id.id,
+            'view_id': self.env.ref(
+                'burgtec_warehouse_customization.burgtec_warehouse_customiation_view_sale_order_line_from_bom_line_form'
+            ).id,
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'active_id': self.id,
+            }
+        }
 
 
     @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids','order_line_id.component_line_ids.live_unit_cost', 'order_line_id.component_line_ids.product_qty')
