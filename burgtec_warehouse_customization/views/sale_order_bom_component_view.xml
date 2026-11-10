@@ -18,7 +18,7 @@
                                    widget="section_and_note_one2many"
                                    mode="list"
                                    no_label="True"
-                                   readonly="state == 'sale'"
+                                   readonly="state == 'sale' or make_readonly_user"
                                    options="{'subsections': False}"
                             >
                                 <list class="no_reorder"
@@ -40,20 +40,24 @@
                                             type="object"
                                             class="btn-primary btn-sm"
                                             icon="fa-plus"
-                                            invisible="not is_parent or parent.state == 'sale'"
+                                            invisible="not is_parent or parent.state == 'sale' or parent.make_readonly_user"
                                             help="Add components to this parent line"/>
                                     <button name="action_open_sale_order_line"
                                             string="Product"
                                             type="object"
                                             class="btn-primary btn-sm"
                                             icon="fa-pencil"
-                                            invisible="not is_parent or parent.state == 'sale'"
+                                            invisible="not is_parent or parent.state == 'sale' or parent.make_readonly_user"
                                             help="Opens Sale Order Line (Parent Line)"/>
 
                                     <field name="product_id" width="400px"
                                            options="{'no_open':1,'no_create':1}"
                                            readonly="1"
                                            force_save="1" style="color:green;" required="1"/>
+                                    <field name="component_notes" width="300px" readonly="parent.state == 'sale'"  force_save="1" class="text-start" invisible="is_parent or display_type" optional="show"/>
+                                    <field name="modification_required" width="170px" readonly="parent.state == 'sale'" force_save="1" class="text-center" invisible="is_parent or display_type" optional="show"/>
+                                    <field name="supplier_id" width="120px" class="text-center"
+                                           readonly="parent.state == 'sale'" options="{'no_create':1}" optional="hide"/>
                                     <field name="product_qty"
                                            width="60px"
                                            class="text-center"
@@ -61,7 +65,7 @@
                                     <field name="unit_component_quantity" width="190px" class="text-center"
                                            readonly="parent.state == 'sale' or is_parent or display_type" force_save="1"/>
 
-                                    <field name="unit_sale_price" width="100px" class="text-center"
+                                    <field name="unit_sale_price" width="100px"
                                            readonly="parent.state == 'sale' or not is_parent"
                                            force_save="1"/>
                                     <field name="total_sale_price" width="100px" class="text-center"
@@ -69,19 +73,20 @@
                                            force_save="1"/>
 
                                     <field name="live_unit_cost" readonly="is_parent" force_save="1" optional="show"
-                                           class="text-center"
                                            decoration-warning="1 == 1" decoration-bf="1 == 1"/>
                                     <field name="total_live_cost" width="100px" class="text-center"
                                            readonly="1"
                                            force_save="1" decoration-warning="1 == 1" optional="hide"/>
-                                    <field name="supplier_id" width="80px" class="text-center"
-                                           readonly="parent.state == 'sale'" options="{'no_create':1}" optional="hide"/>
+
                                     <field name="margin_live_cost"
                                            readonly="1" force_save="1" invisible="not is_parent" width="120px"
                                            class="text-center"
                                            decoration-warning="1 == 1"
                                            optional="hide"/>
-
+                                
+                                    <field name="minimum_landed_cost" width="150px" invisible="is_parent"/>
+                                    <field name="maximum_landed_cost" width="150px" invisible="is_parent"/>
+                                    <field name="latest_landed_cost" width="150px" invisible="is_parent"/>
                                 </list>
                             </field>
                         </page>

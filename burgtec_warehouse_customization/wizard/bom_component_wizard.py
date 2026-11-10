@@ -94,6 +94,7 @@ class BOMComponentWizard(models.TransientModel):
 
         for line in component_lines_to_add:
             res = self.env['sale.order.bom.component.line'].create({
+                    'mrp_bom_id': self.order_line_id.kit_bom_id.id,
                     'component_id': self.component_id.id,
                     'order_line_id': self.parent_line_id.order_line_id.id if self.parent_line_id.order_line_id else False,
                     'product_id': line.product_id.id,

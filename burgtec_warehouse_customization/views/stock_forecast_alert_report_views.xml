@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_custom_inventory_at_date" model="ir.actions.act_window">
+        <field name="name">Inventory at Date</field>
+        <field name="res_model">stock.alert.quantity.history</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- View stock.forecast.alert.report View List -->
+    <record id="view_stock_forecast_alert_report_list" model="ir.ui.view">
+        <field name="name">view.stock.forecast.alert.report.list</field>
+        <field name="model">stock.forecast.alert.report</field>
+        <field name="arch" type="xml">
+            <list js_class="custom_stock_report_list_view">
+                <header>
+                    <!-- invisible="((context.get('inventory_mode') and not context.get('inventory_report_mode')) or context.get('no_at_date'))" -->
+                    <button name="%(action_custom_inventory_at_date)d" string="Inventory at Date" type="action" class="btn-primary ms-1" display="always"/>
+                </header>
+                <field name="product_id" width="500px" decoration-success="status == 'healthy'" decoration-warning="status == 'low'" decoration-danger="status == 'negative'"/>
+                <field name="qty_available" width="150px" optional="hide"/>
+                 <field name="custom_incoming_qty" width="150px"/>
+                 <field name="custom_outgoing_qty" width="150px"/>
+                 <field name="custom_forecasted" string="Custom Forecasted Qty" width="200px" decoration-bf="1" decoration-success="status == 'healthy'" decoration-warning="status == 'low'" decoration-danger="status == 'negative'"/>
+                <field name="incoming_qty" optional="hide"/>
+                <field name="outgoing_qty" optional="hide"/>
+                <field name="forecasted_qty" optional="hide" width="150px" decoration-bf="1" decoration-success="status == 'healthy'" decoration-warning="status == 'low'" decoration-danger="status == 'negative'"/>
+                <field name="status" widget="badge" decoration-success="status == 'healthy'" decoration-warning="status == 'low'" decoration-danger="status == 'negative'"/>
+                <field name="related_sale_order_ids" widget="many2many_tags" width="150px"/>
+                <widget name="related_so_btn"/>
+                <button type="object"
+                    name="action_product_forecast_report"
+                    string="View Forcast"
+                    context="{'default_product_id': id}"
+                    icon="fa-area-chart" title='chart'/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_stock_forecast_alert_report_search_custom" model="ir.ui.view">
+        <field name="name">view.stock.forecast.alert.report.search.custom</field>
+        <field name="model">stock.forecast.alert.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="status"/>
+                <filter name="negative" string="Negative" domain="[('status', '=', 'negative')]"/>
+                <filter name="low" string="Low" domain="[('status', '=', 'low')]"/>
+                <filter name="healthy" string="Healthy" domain="[('status', '=', 'healthy')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action stock.forecast.alert.report -->
+    <record id="action_stock_forecast_alert_report" model="ir.actions.act_window">
+        <field name="name">Stock Forecast Alert Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.forecast.alert.report</field>
+        <field name="view_mode">list</field>
+        <field name="search_view_id" ref="view_stock_forecast_alert_report_search_custom"/>
+    </record>
+
+    <menuitem id="menu_stock_forecast_alert_report" parent="stock.menu_warehouse_report" action="action_stock_forecast_alert_report" name="Stock Forecast Analysis Report" sequence="9999"/>
+
+
+</odoo>

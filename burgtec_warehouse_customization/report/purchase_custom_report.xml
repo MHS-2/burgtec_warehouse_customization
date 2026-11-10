@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="paperformat_purchase_custom" model="report.paperformat">
+        <field name="name">Purchase Order Custom</field>
+        <field name="format">A4</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">60</field>
+        <field name="margin_bottom">30</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_spacing">55</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="report_purchase_custom_report" model="ir.actions.report">
+        <field name="name">Purchase Custom Report</field>
+        <field name="model">purchase.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">burgtec_warehouse_customization.purchase_custom_report</field>
+        <field name="report_file">burgtec_warehouse_customization.purchase_custom_report</field>
+        <field name="print_report_name">'%s - %s' % (object.name, object.partner_id.name)</field>
+        <field name="binding_model_id" ref="model_purchase_order"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="burgtec_warehouse_customization.paperformat_purchase_custom"/>
+    </record>
+
+    <template id="purchase_custom_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <div class="article">
+                        <div class="row header">
+                            <div class="col-3 mt-3">
+                                <img t-att-src="'/burgtec_warehouse_customization/static/img/burgtec_icon.png'"
+                                     alt="Image Description" style="height:180px;"/>
+                            </div>
+                            <div class="col-5 text-start">
+                                <div>
+                                    <span>
+                                        All invoices to:
+                                    </span>
+                                </div>
+                                <div class="fw-bold mt-3">
+                                    <strong style="font-weight: bold;">
+                                        Kennard Group Holdings T/As Burgtec
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span>
+                                        ABN 95 639 808 754
+                                    </span>
+                                </div>
+                                <div>
+                                    <span>
+                                        10A Corella Close
+                                    </span>
+                                </div>
+                                <div>
+                                    <span>
+                                        Berkeley Vale, NSW 2261
+                                    </span>
+                                </div>
+                                <div>
+                                    <span>
+                                        Australia
+                                    </span>
+                                </div>
+                                <div>
+                                    <span>
+                                        P: <strong class="fw-bold" style="font-weight: bold;">02 4329 8100</strong>
+                                    </span>
+                                </div>
+                                <div>
+                                    <span>
+                                        F: <strong class="fw-bold" style="font-weight: bold;">02 4329 8191</strong>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-4 text-start">
+                                <div class="fw-bold">
+                                    <strong style="font-weight: bold; font-size:24px;">
+                                        PURCHASE ORDER
+                                    </strong>
+                                </div>
+                                <div class="mt-3 row" style="font-size:20px;">
+                                    <div class="col-2">
+                                        <span>
+                                            No:
+                                        </span>
+                                    </div>
+                                    <div class="col-10">
+                                         <span style="color:red;">
+                                            <t t-out="doc.name"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-2" style="font-size:12px;">
+                                    <span>
+                                        PLEASE QUOTE THIS ORDER NO. ON ALL
+                                    </span>
+                                </div>
+                                <div style="font-size:12px;">
+                                    <span>
+                                        DELIVERY DOCKETS &amp; INVOICES
+                                    </span>
+                                </div>
+                                <div class="mt-2" style="font-size:12px;">
+                                    <span>
+                                        NO INVOICE CAN BE PROCESSED
+                                    </span>
+                                </div>
+                                <div style="font-size:12px;">
+                                    <span>
+                                        WITHOUT REFERENCE TO THIS ORDER
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clear separation between divs -->
+                        <!-- <div style="clear: both; height: 260px;"></div> -->
+
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="row">
+                                    <div class="col-2">
+                                        <span>
+                                            To:
+                                        </span>
+                                    </div>
+                                    <div class="col-10">
+                                        <span style="font-size:21px; font-weight: bold;">
+                                            <t t-out="doc.partner_id.name"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2">
+                                        <span>
+                                            Attention:
+                                        </span>
+                                    </div>
+                                    <!-- <div style="font-weight: bold;">
+                                        <span style="font-size:14px; font-weight: bold;">
+                                            <t t-out="doc.partner_id.phone"/>
+                                        </span>
+                                    </div> -->
+                                </div>
+                                <div class="row">
+                                    <div class="col-2">
+                                        <span>
+                                            Phone:
+                                        </span>
+                                    </div>
+                                    <div style="font-weight: bold;">
+                                        <span style="font-size:14px; font-weight: bold;">
+                                            <t t-out="doc.partner_id.phone"/>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-2">
+                                        <span>
+                                            Currency:
+                                        </span>
+                                    </div>
+                                    <div style="font-weight: bold;">
+                                        <span style="font-size:21px; font-weight: bold;">
+                                            <t t-out="doc.currency_id.name"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 border" style="padding: 4px;">
+                                <div>
+                                    <span>
+                                        Order Date:
+                                    </span>
+                                </div>
+                                <div class="text-center">
+                                     <t t-if="doc.date_approve">
+                                        <span style="font-weight: bold; font-size:18px;">
+                                            <t t-out="context_timestamp(doc.date_approve).strftime('%d-%m-%Y')"/>
+                                        </span>
+                                    </t>
+                                </div>
+                                <div class="border-top">
+                                    <div>
+                                        <span>
+                                            Delivery Required: 
+                                        </span>
+                                    </div>
+                                    <div class="text-center">
+                                        <t t-if="doc.date_planned">
+                                            <span style="font-weight: bold; font-size:18px;">
+                                                <t t-out="context_timestamp(doc.date_planned).strftime('%d-%m-%Y')"/>
+                                            </span>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="border-top">
+                                    <div>
+                                        <span>
+                                             Required Ready Date: 
+                                        </span>
+                                    </div>
+                                    <div class="text-center">
+                                        <t t-if="doc.required_ready_date">
+                                             <span style="font-weight: bold; font-size:18px;">
+                                                 <t t-out="context_timestamp(doc.required_ready_date).strftime('%d-%m-%Y')"/>
+                                             </span>
+                                         </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clear separation between divs -->
+                        <div style="clear: both; height: 50px;"></div>
+
+                        <div class="row">
+                            <div>
+                                <span style="font-weight: bold;">
+                                    PLEASE FORWARD THE FOLLOWING GOODS:
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Clear separation between divs -->
+                        <div style="clear: both; height: 40px;"></div>
+
+                        <div class="row">
+                            <table class="table table-borderless">
+                                <thead style="padding: 5px; background-color: black; color: white;">
+                                    <tr>
+                                        <th class="border" style="color: white; width:5%;">
+                                            Item
+                                        </th>
+                                        <th class="border text-center" style="color: white; width:10%;"> 
+                                            Qty
+                                        </th>
+                                        <th class="border" style="color: white; width:20%;">
+                                            Code
+                                        </th>
+                                        <th class="border" style="color: white; width:40%;">
+                                            Description
+                                        </th>
+                                        <th class="border text-end" style="color: white; width:12%;">
+                                            Price
+                                        </th>
+                                        <th class="border text-end" style="color: white; width:13%;">
+                                            Amount
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <t t-set="sr_number" t-value="1"/>
+                                    <t t-foreach="doc.order_line" t-as="ol">
+                                        <tr>
+                                            <td class="border text-center" style="padding: 6px; vertical-align: middle;">
+                                                <t t-out="sr_number"/>
+                                            </td>
+                                            <td class="border text-center" style="padding: 6px; vertical-align: middle;">
+                                                <t t-out="ol.product_uom_qty"/>
+                                            </td>
+                                            <td class="border text-center" style="padding: 6px ; vertical-align: middle;">
+                                                <t t-out="ol.product_id.default_code"/>
+                                            </td>
+                                            <td class="border text-center" style="padding: 6px; vertical-align: middle;">
+                                                <t t-out="ol.name"/>
+                                            </td>
+                                            <td class="border text-end" style="padding: 6px; vertical-align: middle;">
+                                                <span>
+                                                    $ <t t-out="ol.price_unit"/>
+                                                </span>
+                                            </td>
+                                            <td class="border text-end" style="padding: 6px; vertical-align: middle;">
+                                                <span>
+                                                    $ <t t-out="ol.price_subtotal"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <t t-set="sr_number" t-value="sr_number + 1"/>
+                                    </t>
+                                    <tr>
+                                        <td style="padding: 6px;">
+                                        </td>
+                                        <td style="padding: 6px;">
+                                        </td>
+                                        <td style="padding: 6px;">
+                                        </td>
+                                        <td style="padding: 6px;">
+                                            
+                                        </td>
+                                        <td class="border" style="padding: 6px width:auto;">
+                                            Total Exl GST
+                                        </td>
+                                        <td class="border text-end" style="padding: 6px; vertical-align: middle;">
+                                            <span>
+                                                $ <t t-out="doc.amount_untaxed"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-2">
+                                <span>
+                                    DELIVER TO:
+                                </span>
+                            </div>
+                            <div class="col-10">
+                                <span style="font-weight: bold;">
+                                    10A Corella Close, Berkeley Vale NSW 2261
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Clear separation between divs -->
+                        <div style="clear: both; height: 50px;"></div>
+
+                        <div style="line-height: 1.0;">
+                            <div>
+                                <span class="text-decoration-underline" style="font-weight: bold; font-size:13px;">
+                                    Attention Sub Contractors:
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    PRIOR to any work being completed on site, you must provide and/or complete the below                                
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    * Public liability insurance
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    * Workers compensation certificate of currency
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    * All workers attending site to complete the AMS Furniture Contractor Induction
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    * Relevant licences or certificates of the workers
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    * Safe Work Method Statements for the work being completed
+                                </span>
+                            </div>
+                            <div>
+                                <span style="font-size:13px;">
+                                    * Workers will be required to complete a site specific induction upon arrival on site
+                                </span>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="footer">
+                        <div class="row border">
+                            <div class="col-9 border" style="padding: 4px;">
+                                <span>
+                                    SPECIAL INSTRUCTIONS:
+                                </span>
+                            </div>
+                            <div class="col-3 border" style="padding: 4px;">
+                                <div>
+                                    <span>
+                                        AUTHORISED BY:
+                                    </span>
+                                </div>
+                                <div>
+                                    <strong>Oliver Kennard</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+</odoo>

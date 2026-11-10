@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id='burgtec_warehouse_customization.view_stock_landed_cost_form_ext' model='ir.ui.view'>
+        <field name="name">burgtec_warehouse_customization.view.stock.landed.cost.form.ext</field>
+        <field name="model">stock.landed.cost</field>
+        <field name="inherit_id" ref="stock_landed_costs.view_stock_landed_cost_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='valuation_adjustment_lines']/list/field[@name='cost_line_id']" position="attributes">
+                <attribute name="width">220px</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='valuation_adjustment_lines']/list/field[@name='product_id']" position="attributes">
+                <attribute name="width">250px</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='valuation_adjustment_lines']/list/field[@name='additional_landed_cost']" position="attributes">
+                <attribute name="width">150px</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='valuation_adjustment_lines']/list/field[@name='additional_landed_cost']" position="after">
+                <field name="additional_landed_cost_per_unit" sum="total_additional_landed_cost_per_unit" width="220px"/>
+            </xpath>
+
+            <xpath expr="//field[@name='valuation_adjustment_lines']/list/field[@name='volume']" position="attributes">
+                <attribute name="string">Product's CBM</attribute>
+                <attribute name="width">150px</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='picking_ids']" position="after">
+                <field name="pick_domain" readonly="1" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//field[@name='picking_ids']" position="attributes">
+                <attribute name="domain">[('company_id', '=', company_id), '|', ('move_ids.is_in', '!=', False), ('move_ids.is_out', '!=', False), ('origin','=',pick_domain)]</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

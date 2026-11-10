@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <odoo>
+      
+    <!-- View product.supplierinfo list -->
+    <record id="view_product_supplierinfo_list" model="ir.ui.view">
+        <field name="name">view.product.supplierinfo.list</field>
+        <field name="model">product.supplierinfo</field>
+        <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+              <field name="supplier_code"/>
+            </xpath>
+        </field>
+    </record>
+
+  </odoo>

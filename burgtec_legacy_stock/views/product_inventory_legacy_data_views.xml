@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Product Inventory Legacy Data: show the added fields -->
+    <record id="view_product_inventory_legacy_data_list_legacy" model="ir.ui.view">
+        <field name="name">view.product.inventory.legacy.data.list.legacy</field>
+        <field name="model">product.inventory.legacy.data</field>
+        <field name="inherit_id" ref="burgtec_warehouse_customization.view_product_inventory_legacy_data_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="partner_id" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='bin_location']" position="after">
+                <field name="location_id" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='stock_landed_total']" position="after">
+                <field name="item_extras_cost" optional="hide"/>
+                <field name="supplier_name" optional="hide"/>
+                <field name="supplier_code" optional="hide"/>
+                <field name="sheet_row" optional="hide"/>
+                <field name="import_batch" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- The original model had no search view -->
+    <record id="view_product_inventory_legacy_data_search_legacy" model="ir.ui.view">
+        <field name="name">view.product.inventory.legacy.data.search.legacy</field>
+        <field name="model">product.inventory.legacy.data</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="partner_id"/>
+                <field name="supplier_name"/>
+                <field name="bin_location"/>
+                <field name="location_id"/>
+                <field name="import_batch"/>
+                <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
+                <filter name="group_partner" string="Supplier" context="{'group_by': 'partner_id'}"/>
+                <filter name="group_batch" string="Import Batch" context="{'group_by': 'import_batch'}"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

@@ -8,7 +8,9 @@
         <field name="inherit_id" ref="product.product_template_tree_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='default_code']" position="after">
-                <field name="custom_product_type" widget="badge" decoration-info="custom_product_type == 'product'" decoration-warning="custom_product_type == 'component'"/>
+                <field name="custom_product_type" width="160px" widget="badge"
+                       decoration-info="custom_product_type == 'product'"
+                       decoration-warning="custom_product_type == 'component'"/>
             </xpath>
         </field>
     </record>
@@ -19,19 +21,148 @@
         <field name="inherit_id" ref="product.product_product_tree_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='default_code']" position="after">
-                <field name="custom_variant_type" widget="badge" decoration-info="custom_variant_type == 'product'" decoration-warning="custom_variant_type == 'component'" />
+                <field name="custom_variant_type" width="160px" widget="badge"
+                       decoration-info="custom_variant_type == 'product'"
+                       decoration-warning="custom_variant_type == 'component'"/>
+            </xpath>
+
+            <xpath expr="//field[@name='product_template_variant_value_ids']" position="after">
+                <field name="id_of_it_hub" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='qty_available']" position="before">
+                <field name="minimum_reorder_qty" optional="hide"/>
             </xpath>
         </field>
     </record>
-<!--    Form View-->
+    <!--    Form View-->
     <record id="burgtec_warehouse_customization.product_template_form_ext" model="ir.ui.view">
         <field name="name">burgtec_warehouse_customization.product.template.form.view.ext</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='options']" position="after">
-                <label for="custom_product_type" string="Custom Product Type"/>
-                <field name="custom_product_type"/>
+                <div>
+                    <label for="custom_product_type" string="Custom Product Type"/>
+                    <field name="custom_product_type" required="1" style="margin-left:10px;"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='default_code']" position="attributes">
+                <attribute name="string">Internal Reference</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='product_tooltip']" position="after">
+                <field name="id_of_it_hub"/>
+                <field name="is_obsolete"/>
+                <field name="vendor_currency_id" placeholder="Vendor Currency"/>
+                <field name="supplier_code" placeholder="Supplier Code"/>
+                <field name="minimum_qty"/>
+                <field name="maximum_qty"/>
+            </xpath>
+
+            <xpath expr="//div[@invisible='not is_storable']" position="after">
+                <div class="o_row" invisible="not is_storable">
+                    <label for="custom_incoming" string="Incoming Qty" class="fw-bold"/>
+                    <a type="object" name="action_open_validate_incoming_pos">
+                        <field name="custom_incoming" readonly="True" on_change="1"/>
+                    </a>
+                </div>
+
+                <div class="o_row" invisible="not is_storable">
+                    <label for="custom_outgoing" string="Outgoing Qty" class="fw-bold"/>
+                    <a type="object" name="action_open_validate_outgoing_so">
+                        <field name="custom_outgoing" readonly="True" on_change="1"/>
+                    </a>
+                </div>
+    
+                <field name="custom_virtual_available" string="Forecasted Qty"/>
+            </xpath>
+
+            <xpath expr="//div[@name='standard_price_uom']" position="after">
+                <field name="latest_landed_cost" invisible="custom_product_type == 'product'"/>
+                <field name="minimum_landed_cost" invisible="custom_product_type == 'product'"/>
+                <field name="maximum_landed_cost" invisible="custom_product_type == 'product'"/>
+                <field name="average_landed_cost" invisible="custom_product_type == 'product'"/>
+                <field name="manual_landed_cost" invisible="custom_product_type == 'product'"/>
+                <field name="actual_landed_cost" invisible="custom_product_type == 'product'"/>
+            </xpath>
+
+            <xpath expr="//group[@name='inventory']" position="before">
+                <group>
+                    <group name="package_dimensions" string="Package Dimension &amp; CBM Calculations" invisible="custom_product_type == 'product'">
+                        <label for="package_height"/>
+                        <div class="o_row" name="package_height">
+                            <field name="package_height" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>mm</span>
+                        </div>
+                        <label for="package_width"/>
+                        <div class="o_row" name="package_width">
+                            <field name="package_width" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>mm</span>
+                        </div>
+    
+                        <label for="package_depth"/>
+                        <div class="o_row" name="package_depth">
+                            <field name="package_depth" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>mm</span>
+                        </div>
+    
+                        <label for="package_weight"/>
+                        <div class="o_row" name="package_weight">
+                            <field name="package_weight" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>kg</span>
+                        </div>
+                        <label for="quantities_per_package"/>
+                        <div class="o_row" name="quantities_per_package">
+                            <field name="quantities_per_package" class="oe_inline" style="max-width: 7rem;"/>
+                            <span></span>
+                        </div>
+    
+                        <label for="product_weight"/>
+                        <div class="o_row" name="product_weight">
+                            <field name="product_weight" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>kg</span>
+                        </div>
+    
+    
+                        <label for="package_cbm" string="Package CBM"/>
+                        <div class="o_row" name="package_cbm">
+                            <field name="package_cbm" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>
+                                <field name="cbm_uom_name"/>
+                            </span>
+                        </div>
+                        <label for="product_cbm" string="Product CBM"/>
+                        <div class="o_row" name="cbm">
+                            <field name="product_cbm" class="oe_inline" style="max-width: 7rem;"/>
+                            <span>
+                                <field name="cbm_uom_name"/>
+                            </span>
+                        </div>
+                    </group>
+    
+                    <group name="manual_cost_calculation" string="Manual Landed Cost Calculation" invisible="custom_product_type == 'product'">
+                        <field name="standard_freight_cost_per_cbm" class="oe_inline" style="max-width: 7rem;"/>
+                        <field name="standard_exchange_rate" class="oe_inline" style="max-width: 7rem;" widget="percentage"/>
+                        <field name="standard_duty_or_tax" class="oe_inline" style="max-width: 7rem;" widget="percentage"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <xpath expr="//label[@for='volume']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//div[@name='volume']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='weight']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[@name='weight']" position="attributes">
+                <attribute name="invisible">1</attribute>
             </xpath>
 
         </field>
@@ -45,9 +176,171 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='image_1920']" position="before">
+                <field name="warning_html"/>
+            </xpath>
             <xpath expr="//div[@name='options']" position="after">
-                <label for="custom_variant_type" string="Custom Variant Type"/>
-                <field name="custom_variant_type"/>
+                <div>
+                    <label for="custom_variant_type" string="Custom Variant Type"/>
+                    <field name="custom_variant_type" required="1" style="margin-left:10px;"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='invoice_policy']" position="after">
+                <field name="id_of_it_hub"/>
+                <!--                <field name="show_manual_landed_cost"/>-->
+                <field name="is_obsolete"/>
+                <field name="product_manual_landed_cost" invisible="custom_variant_type != 'product'"/>
+                <field name="product_average_landed_cost" invisible="custom_variant_type != 'product'"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button"
+                        name="view_valuation_adjustments"
+                        string="Valuation Adjustments"
+                        type="object"
+                        icon="fa-list-alt"
+                        help="Valuation Adjustments For This Product">
+                </button>
+            </xpath>
+
+            <xpath expr="//div[@name='standard_price_uom']" position="after">
+                <field name="latest_landed_cost" invisible="custom_variant_type == 'product'"/>
+                <field name="minimum_landed_cost" invisible="custom_variant_type == 'product'"/>
+                <field name="maximum_landed_cost" invisible="custom_variant_type == 'product'"/>
+                <field name="average_landed_cost" invisible="custom_variant_type == 'product'"/>
+                <field name="manual_landed_cost" invisible="custom_variant_type == 'product'"/>
+                <field name="actual_landed_cost" invisible="custom_variant_type == 'product'"/>
+            </xpath>
+
+            <xpath expr="//group[@name='operations']" position="before">
+                <group name="package_dimensions" string="Package Dimension &amp; CBM Calculations" invisible="custom_variant_type == 'product'">
+                    <label for="package_height"/>
+                    <div class="o_row" name="package_height">
+                        <field name="package_height" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>mm</span>
+                    </div>
+                    <label for="package_width"/>
+                    <div class="o_row" name="package_width">
+                        <field name="package_width" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>mm</span>
+                    </div>
+
+                    <label for="package_depth"/>
+                    <div class="o_row" name="package_depth">
+                        <field name="package_depth" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>mm</span>
+                    </div>
+
+                    <label for="package_weight"/>
+                    <div class="o_row" name="package_weight">
+                        <field name="package_weight" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>kg</span>
+                    </div>
+                    <label for="quantities_per_package"/>
+                    <div class="o_row" name="quantities_per_package">
+                        <field name="quantities_per_package" class="oe_inline" style="max-width: 7rem;"/>
+                        <span></span>
+                    </div>
+
+                    <label for="product_weight"/>
+                    <div class="o_row" name="product_weight">
+                        <field name="product_weight" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>kg</span>
+                    </div>
+
+
+                    <label for="package_cbm" string="Package CBM"/>
+                    <div class="o_row" name="package_cbm">
+                        <field name="package_cbm" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>
+                            <field name="cbm_uom_name"/>
+                        </span>
+                    </div>
+                    <label for="product_cbm" string="Product CBM"/>
+                    <div class="o_row" name="cbm">
+                        <field name="product_cbm" class="oe_inline" style="max-width: 7rem;"/>
+                        <span>
+                            <field name="cbm_uom_name"/>
+                        </span>
+                    </div>
+                </group>
+
+                
+
+            </xpath>
+
+            <xpath expr="//group[@name='package_dimensions']" position="after">
+                <group name="manual_cost_calculation" string="Manual Landed Cost Calculation" invisible="custom_variant_type == 'product'">
+                    <field name="standard_freight_cost_per_cbm" class="oe_inline" style="max-width: 7rem;"/>
+                    <field name="standard_exchange_rate" class="oe_inline" style="max-width: 7rem;" widget="percentage"/>
+                    <field name="standard_duty_or_tax" class="oe_inline" style="max-width: 7rem;" widget="percentage"/>
+                </group>
+            </xpath>
+
+
+            <xpath expr="//label[@for='volume']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//div[@name='volume']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//label[@for='weight']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//div[@name='weight']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="string">Supplier Cost(raw value)</attribute>
+            </xpath>
+
+
+            <xpath expr="//page[@name='inventory']" position="after">
+                <page name="lc_valuation_adjustment" string="Landed Cost Valuation Adjustment" invisible="custom_variant_type == 'product'">
+                    <field name="stock_valuation_adjustment_line_ids" readonly="1">
+                        <list string="Valuation Adjustments" create="0" delete="0" editable="bottom">
+                            <field name="cost_id" width="150px"/>
+                            <field name="cost_line_id" readonly="1" width="220px"/>
+                            <!-- <field name="product_id" readonly="1" width="250px"/> -->
+                            <field name="weight" readonly="1" optional="hide"/>
+                            <field name="volume" readonly="1" optional="hide"/>
+                            <field name="quantity" readonly="1"/>
+                            <field name="currency_id" column_invisible="True"/>
+                            <field name="former_cost" readonly="1"/>
+                            <field name="final_cost" readonly="1"/>
+                            <field name="additional_landed_cost" sum="total_addition_landed_cost" width="150"/>
+                            <field name="additional_landed_cost_per_unit" sum="total_additional_landed_cost_per_unit" width="220px"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+            <xpath expr="//field[@name='product_tooltip']" position="after">
+                <field name="vendor_currency_id" options="{'no_open':1}"/>
+                <field name="supplier_code"/>
+                <field name="minimum_qty"/>
+                <field name="maximum_qty"/>
+            </xpath>
+
+            <xpath expr="//div[@invisible='not is_storable']" position="after">
+                <div class="o_row" invisible="not is_storable">
+                    <label for="custom_incoming" string="Incoming Qty" class="fw-bold"/>
+                    <a type="object" name="action_open_validate_incoming_pos">
+                        <field name="custom_incoming" readonly="True" on_change="1"/>
+                    </a>
+                </div>
+
+                <div class="o_row" invisible="not is_storable">
+                    <label for="custom_outgoing" string="Outgoing Qty" class="fw-bold"/>
+                    <a type="object" name="action_open_validate_outgoing_so">
+                        <field name="custom_outgoing" readonly="True" on_change="1"/>
+                    </a>
+                </div>
+    
+                <field name="custom_virtual_available" string="Forecasted Qty"/>
             </xpath>
         </field>
     </record>
@@ -59,6 +352,23 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='default_code']" position="before">
                 <field name="custom_variant_type"/>
+            </xpath>
+            <xpath expr="//field[@name='barcode']" position="after">
+                <field name="id_of_it_hub"/>
+            </xpath>
+
+            <xpath expr="//field[@name='currency_id']" position="before">
+                <field name="average_landed_cost"/>
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button"
+                        name="view_valuation_adjustments"
+                        string="Valuation Adjustments"
+                        type="object"
+                        icon="fa-list-alt"
+                        help="Valuation Adjustments For This Product">
+                </button>
             </xpath>
         </field>
     </record>
@@ -85,6 +395,38 @@
                 </aside>
             </xpath>
         </field>
+    </record>
+
+    <!-- Search View for Product Templates -->
+    <record id="burgtec_warehouse_customization.product_template_search_view" model="ir.ui.view">
+        <field name="name">burgtec.warehouse.customization.product.template.search.view</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="stock.product_template_search_form_view_stock"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='goods']" position="before">
+                <filter string="Product" name="custom product" domain="[('custom_product_type', '=', 'product')]"/>
+                <filter string="Component" name="custom component" domain="[('custom_product_type', '=', 'component')]"/>
+                <filter string="Landed Cost Product" name="lc product" domain="[('landed_cost_ok', '=', True)]"/>
+                <separator/>
+            </xpath>
+        </field>
+
+    </record>
+
+    <!-- Search View for Product Variants -->
+    <record id="burgtec_warehouse_customization.product_product_search_view" model="ir.ui.view">
+        <field name="name">burgtec.warehouse.customization.product.product.search.view</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='goods']" position="before">
+                <filter string="Product" name="custom product" domain="[('custom_variant_type', '=', 'product')]"/>
+                <filter string="Component" name="custom component" domain="[('custom_variant_type', '=', 'component')]"/>
+                <filter string="Landed Cost Product" name="lc product" domain="[('landed_cost_ok', '=', True)]"/>
+                <separator/>
+            </xpath>
+        </field>
+
     </record>
 
 

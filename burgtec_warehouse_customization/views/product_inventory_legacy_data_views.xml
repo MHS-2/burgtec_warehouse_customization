@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- View product.inventory.legacy.data View List -->
+    <record id="view_product_inventory_legacy_data_list" model="ir.ui.view">
+        <field name="name">view.product.inventory.legacy.data.list</field>
+        <field name="model">product.inventory.legacy.data</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="product_id"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="item_price_ex"/>
+                <field name="item_cbm"/>
+                <field name="item_exchange_cost"/>
+                <field name="item_duty_cost"/>
+                <field name="item_freight_cost"/>
+                <field name="item_landed_cost"/>
+                <field name="stock_location"/>
+                <field name="bin_location"/>
+                <field name="stock_landed_total"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action product.inventory.legacy.data -->
+    <record id="action_product_inventory_legacy_data" model="ir.actions.act_window">
+        <field name="name">Product Inventory Legacy Data</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.inventory.legacy.data</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                There is no examples click here to add new Product Inventory Legacy Data.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_product_inventory_legacy_data" parent="stock.menu_stock_inventory_control" action="action_product_inventory_legacy_data" name="Product Inventory Legacy Data" sequence="9999"/>
+
+
+</odoo>

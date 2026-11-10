@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <odoo>
+      
+    <!-- View res.partner form -->
+    <record id="burgtec_warehouse_view_res_partner_form" model="ir.ui.view">
+        <field name="name">burgtec.warehouse.view.res.partner.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[2]" position="after">
+                <group>
+                    <field name="supplier_code" placeholder="Supplier Code"/>
+                    <field name="standard_freight_cost_per_cbm"/>
+                    <field name="standard_exchange_rate" widget="percentage"/>
+                    <field name="standard_duty_or_tax" widget="percentage"/>
+                </group>
+                <group>
+                    <field name="is_landed_cost_vendor" string="Landed Cost Vendor"/>
+                    <field name="product_ids" invisible="not is_landed_cost_vendor" required="is_landed_cost_vendor" widget="many2many_tags" domain="[('landed_cost_ok','=',True)]"/>
+                    <!-- <field name="product_id" options="{'no_open':1}" invisible="not is_landed_cost_vendor" required="is_landed_cost_vendor"/> -->
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+
+    <!-- View res.partner list -->
+    <record id="burgtec_warehouse_view_res_partner_list" model="ir.ui.view">
+        <field name="name">burgtec.warehouse.view.res.partner.list</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='complete_name']" position="after">
+                <field name="supplier_code" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+  </odoo>

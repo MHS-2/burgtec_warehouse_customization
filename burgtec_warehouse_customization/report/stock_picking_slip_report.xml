@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <template id="stock_picking_slip">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page">
+                    <div class="article" style="padding: 20px 30px 0;">
+                        <table class="table table-borderless"
+                               style="width: 100%; border-collapse: collapse; margin-bottom:15px;">
+                            <!-- NAME -->
+                            <tr>
+                                <td style="width: 50%;vertical-align: top;padding: 0;">
+                                    <span style="font-size: 70px;">
+                                        <strong>
+                                            <span style="color:#172033;">burg</span>
+                                            <span style="color:#8A948A;margin-left:-10px;">tec</span>
+                                            <span style="color:#172033;margin-left:-10px;">.</span>
+                                        </strong>
+                                    </span>
+                                </td>
+                                <!-- WAREHOUSE -->
+                                <td style="width:40%; text-align:right;">
+                                    <h2 style="font-size:38px;">
+                                        WAREHOUSE
+                                    </h2>
+                                    <br/>
+                                    <!--         ORDER NO-->
+                                    <strong>Order No:</strong>
+                                    <t t-out="o.origin"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <tr>
+                        </tr>
+                        <table style="width:100%; margin-top:15px; border-collapse:separate;border-spacing:10px 0;">
+                            <tr>
+                                <!-- LEFT Table block-->
+                                <td style="width:20%; border:1px solid #000; padding:8px;font-size:14px;font-weight:bold;">
+                                    <strong>Customer :</strong>
+                                    <span t-out="o.partner_id.name"/>
+                                </td>
+
+                                <!--         Deadline-->
+                                <td style="width:20%; border:1px solid #000; padding:8px;font-size:14px;font-weight:bold;">
+
+                                    <strong>Production Deadline:</strong>
+
+                                </td>
+                                <td style="width:15%; border:1px solid #000; padding:8px;font-size:14px;">
+                                    <span t-out="o.scheduled_date.strftime('%d/%m/%y')"/>
+                                </td>
+                            </tr>
+                        </table>
+                        <!--                    PROJECT-->
+                        <table style="width:100%; margin-top:10px; border-collapse:separate;border-spacing:10px 0;">
+                            <td style="width:20%;border:1px solid #000; padding:8px;font-size:14px;font-weight:bold;">
+                                <strong>Project :</strong>
+                                <span>
+                                    -
+                                </span>
+                            </td>
+                        </table>
+                        <!--        PROCESSED BY-->
+                        <table style="width:100%; margin-top:8px; border-collapse:separate;border-spacing:10px 0;">
+                            <td style="width:20%;border:1px solid #000; padding:8px;font-size:14px;font-weight:bold;">
+
+                                <strong>Processed By:</strong>
+                            </td>
+
+                            <td style="width:30%;border:1px solid #000; padding:8px;font-size:14px;">
+                                Hannah Cane
+                            </td>
+                        </table>
+                        <!--        PICKED BY-->
+                        <table style="width:100%; margin-top:10px; border-collapse:separate;border-spacing:10px 0;">
+                            <td style="width:20%;border:1px solid #000; padding:8px;font-size:14px;font-weight:bold;">
+                                <strong>Picked By:</strong>
+                            </td>
+                            <td style="width:30%;border:1px solid #000; padding:8px;font-size:14px;">
+                            </td>
+                        </table>
+                        <!--  SHIP TO    CUSTOMER PICKUP-->
+                        <table style="width:100%; margin-top:8px; border-collapse:separate;border-spacing:10px 0;">
+                            <tr>
+                                <td style="width:20%;border:1px solid #000; padding:8px;font-size:14px;font-weight:bold;">
+                                    <strong>Ship To :</strong>
+                                </td>
+                                <td style="width:30%;border:1px solid #000; padding:8px;font-size:14px;">
+                                    Customer Pickup - BV - Palletised
+                                </td>
+                            </tr>
+                        </table>
+                        <!--        SUPPLY FROM-->
+                        <td style="width: 15%;vertical-align: top;text-align: center;padding: 0;">
+                            <div style="background:#808080;text-align:center;font-size:22px;font-weight:bold;padding:8px;margin-top:10px;">
+                                <strong>SUPPLY FROM :
+                                    <span t-field="o.location_id"/>
+                                </strong>
+                            </div>
+                            <div style="font-size: 15px;">
+                            </div>
+                        </td>
+                        <!--      TABLE-->
+                        <table class="table table-borderless"
+                               style="
+                                        width: 100%;
+                                        table-layout: fixed;
+                                        border-collapse: collapse;
+                                        margin-top:10px;border:1px solid #000;">
+
+
+                            <colgroup>
+                                <col style="width:8%;"/>
+                                <col style="width:16%;"/>
+                                <col style="width:28%;"/>
+                                <col style="width:8%;"/>
+                                <col style="width:8%;"/>
+                                <col style="width:8%;"/>
+                                <col style="width:37%;"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th colspan="7"
+                                        style="background:#f2f2f2;text-align:left;border:1px solid #000;padding:5px;font-weight:bold;">
+                                        WAREHOUSE ORDER ITEMS
+                                    </th>
+                                </tr>
+                                <tr style="background:#f2f2f2;">
+
+                                    <th style="border:1px solid #000;padding:5px;text-align:center;">
+                                        Qty
+                                    </th>
+
+
+                                    <th style="border:1px solid #000;padding:5px;">
+                                        Part Number
+                                    </th>
+
+
+                                    <th style="border:1px solid #000;padding:5px;">
+                                        Description
+                                    </th>
+
+
+                                    <th style="border:1px solid #000;padding:5px;text-align:center;">
+                                        QP
+                                    </th>
+
+
+                                    <th style="border:1px solid #000;padding:5px;text-align:center;">
+                                        QC
+                                    </th>
+
+
+                                    <th style="border:1px solid #000;padding:5px;text-align:center;">
+                                        UOM
+                                    </th>
+
+
+                                    <th style="border:1px solid #000;padding:5px;text-align:center;">
+                                        Location
+                                    </th>
+
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <t t-foreach="docs" t-as="o">
+
+
+                                    <t t-foreach="o.move_ids" t-as="line">
+
+                                        <tr>
+
+                                            <!-- Quantity -->
+
+                                            <td style="
+                                                    text-align: center;
+                                                    vertical-align: top;
+                                                    padding: 4px;
+                                                    border:1px solid #000;">
+
+                                                <span t-field="line.quantity"/>
+
+                                            </td>
+
+
+                                            <!-- Part Number -->
+
+                                            <td style="
+                                                    text-align: left;
+                                                    vertical-align: top;
+                                                    padding: 4px;
+                                                    border:1px solid #000;
+                                                    white-space: normal;
+                                                    word-wrap: break-word;">
+
+                                                <span t-field="line.product_id.default_code"/>
+
+                                            </td>
+
+
+                                            <!-- Description -->
+
+                                            <td style="
+                                                    text-align: left;
+                                                    vertical-align: top;
+                                                    padding: 4px;
+                                                    border:1px solid #000;
+                                                    white-space: normal;
+                                                    word-wrap: break-word;">
+
+                                                <span t-field="line.product_id"/>
+
+                                            </td>
+
+
+                                            <!-- QP -->
+
+                                            <td style="text-align: center;vertical-align: top;
+                                                    padding: 4px;
+                                                    border:1px solid #000;
+                                                    white-space: nowrap;">
+
+                                                <!--                                                <t t-out="line."/>-->
+                                            </td>
+
+
+                                            <!-- QC -->
+
+                                            <td style="
+                                                    text-align: center;
+                                                    vertical-align: top;
+                                                    padding: 4px;
+                                                    border:1px solid #000;
+                                                    white-space: nowrap;">
+
+                                                <!--                                                <t t-out="line."/>-->
+                                            </td>
+
+                                            <!-- UOM -->
+                                            <td style="
+                                                    text-align: center;
+                                                    vertical-align: top;
+                                                    padding: 4px;
+                                                    border:1px solid #000;
+                                                    white-space: nowrap;">
+
+                                                <span t-field="line.product_uom"/>
+
+                                            </td>
+
+                                            <!-- Location -->
+
+                                            <td style="text-align: left;vertical-align: top;padding: 4px;border:1px solid #000;white-space:nowrap;font-size:12px;">
+
+                                                <t t-set="locations"
+                                                   t-value="get_product_location_quantities(line.product_id)"/>
+
+                                                <t t-foreach="locations" t-as="location">
+                                                    <div style="white-space: nowrap; margin-bottom: 3px;padding-top: 2px;">
+
+                                                        <span t-out="'—' +location['location']"/>
+                                                        <span t-out="' (%.0f)' % location['quantity']"/>
+
+                                                    </div>
+                                                </t>
+                                            </td>
+                                        </tr>
+
+                                    </t>
+                                </t>
+
+
+                                <!-- INIT ROW -->
+                                <tr>
+                                    <td colspan="3"
+                                        style="border:1px solid #000;padding:8px;text-align:left;font-size:14px;">
+                                        INIT
+                                    </td>
+
+                                    <td style="border:1px solid #000;padding:8px;">
+                                    </td>
+
+                                    <td style="border:1px solid #000;padding:8px;">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <!--   Footer-->
+                <div class="footer"
+                     style="font-size:14px;font-weight:bold;width:100%;border-top:1px solid #000;padding-top:10px;">
+
+                    <div style="width:50%; float:left;">
+                        AMS Furniture Systems - ABN 95 639 808 754
+                    </div>
+                    <div style="width:50%;float:right;text-align:right;">
+
+                        Job #:
+                        <span t-out="o.name"/>
+
+                        -
+                        PRINTED
+                        <span t-out="context_timestamp(datetime.datetime.now()).strftime('%d/%m/%Y %H:%M:%S')"/>
+                        Page
+                        <span class="page"/>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+    <record id="paperformat_stock_picking_slip_report" model="report.paperformat">
+        <field name="name">Stock Picking Slip Report</field>
+        <field name="default" eval="True"/>
+        <field name="format">custom</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">5</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <record id="action_stock_picking_slip_report" model="ir.actions.report">
+        <field name="name">Stock Picking Slip Report</field>
+        <field name="model">stock.picking</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">burgtec_warehouse_customization.stock_picking_slip</field>
+        <field name="report_file">burgtec_warehouse_customization.stock_picking_slip</field>
+        <field name="print_report_name">'Stock Picking Slip - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
+        <field name="binding_type">report</field>
+        <field name="multi">True</field>
+        <field name="paperformat_id" ref="burgtec_warehouse_customization.paperformat_stock_picking_slip_report"/>
+    </record>
+
+</odoo>

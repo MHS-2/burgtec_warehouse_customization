@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- View lc.stock.inventory.report View List -->
+    <record id="view_lc_stock_inventory_report_list" model="ir.ui.view">
+        <field name="name">view.lc.stock.inventory.report.list</field>
+        <field name="model">lc.stock.inventory.report</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="invoice_date" width="130px"/>
+                <field name="purchase_order_id" width="150px" string="Purchase Order" widget="many2one"/>
+                <field name="partner_id" width="300px"/>
+                <field name="picking_ids" widget="many2many_tags" width="180px" string="Receipt"/>
+                <field name="partner_code" width="250px"/>
+                <field name="product_reference" width="250px"/>
+                <field name="product_id" width="350px"/>
+                <field name="quantity"/>
+                <field name="product_cost" width="150px"/>
+                <field name="product_cbm" width="150px"/>
+                <field name="product_exchange_cost" width="150px"/>
+                <field name="product_duty_cost" width="150px"/>
+                <field name="product_freight_cost" width="150px"/>
+                <field name="total_product_cost" width="150px"/>
+                <field name="location_dest_id" width="150px"/>
+                <field name="qty_available" width="120px"/>
+            </list>
+        </field>
+    </record>
+
+
+    <!-- Action lc.stock.inventory.report -->
+    <record id="action_lc_stock_inventory_report" model="ir.actions.act_window">
+        <field name="name">Stock Inventory With Landed Costs Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">lc.stock.inventory.report</field>
+        <field name="view_mode">list</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                There is no examples click here to add new LC Stock Inventory Report.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_action_lc_stock_inventory_report" parent="stock.menu_warehouse_report" action="action_lc_stock_inventory_report" name="LC Product Stock Report" sequence="9999"/>
+
+
+</odoo>

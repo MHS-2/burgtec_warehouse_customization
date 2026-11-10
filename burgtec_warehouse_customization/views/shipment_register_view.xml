@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- LIST -->
+    <record id="shipment_register_view_list" model="ir.ui.view">
+        <field name="name">shipment.register.list</field>
+        <field name="model">shipment.register</field>
+        <field name="arch" type="xml">
+            <list string="Shipments" decoration-muted="state == 'cancel'"
+                  decoration-danger="eta_pod_diff_days &gt; 0" decoration-success="state == 'delivered'">
+                <field name="name"/>
+                <field name="container_number" optional="show"/>
+                <field name="container_size" optional="show"/>
+                <field name="shipment_status" optional="show"/>
+                <field name="shipment_mode" optional="hide"/>
+                <field name="freight_forwarder" optional="show"/>
+                <field name="carrier_company" optional="hide"/>
+                <field name="port_departure" optional="show"/>
+                <field name="destination" optional="show"/>
+                <field name="date_departure" optional="show"/>
+                <field name="date_eta_pod" optional="show"/>
+                <field name="date_eta_pod_auto" optional="show"/>
+                <field name="eta_pod_diff_days" optional="show"/>
+                <field name="purchase_order_count" optional="hide"/>
+                <field name="total_weight" sum="Total" optional="show"/>
+                <field name="total_cbm" sum="Total" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state in ('booked', 'loading')"
+                       decoration-warning="state in ('in_transit', 'arrived_pod')"
+                       decoration-success="state == 'delivered'"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="shipment_register_view_form" model="ir.ui.view">
+        <field name="name">shipment.register.form</field>
+        <field name="model">shipment.register</field>
+        <field name="arch" type="xml">
+            <form string="Shipment">
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"
+                           statusbar_visible="draft,booked,loading,in_transit,arrived_pod,delivered,cancel"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_purchase_orders" type="object" invisible="not shipment_line_ids"
+                                class="oe_stat_button" icon="fa-shopping-cart">
+                            <field name="purchase_order_count" widget="statinfo" string="POs"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Container">
+                            <field name="shipment_mode"/>
+                            <field name="shipment_status"/>
+                            <field name="container_size"/>
+                            <field name="container_number"/>
+                            <field name="fumigation_required"/>
+                        </group>
+                        <group string="Totals">
+                            <field name="total_weight"/>
+                            <field name="total_cbm"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Carrier">
+                            <field name="freight_forwarder"/>
+                            <field name="carrier_company"/>
+                            <field name="carrier_route_ref"/>
+                            <field name="tracking_url" widget="url"/>
+                        </group>
+                        <group string="Route">
+                            <field name="loading_location_ids" widget="many2many_tags"/>
+                            <field name="port_departure"/>
+                            <field name="destination"/>
+                            <field name="delivery_address_id"/>
+                        </group>
+                        <group string="Dates (Manual)">
+                            <field name="date_loading"/>
+                            <field name="date_loading_cutoff"/>
+                            <field name="date_departure"/>
+                            <field name="date_eta_pod"/>
+                            <field name="date_eta_delivered"/>
+                        </group>
+                        <group string="ETA Tracking (Auto)">
+                            <field name="date_eta_pod_auto"/>
+                            <field name="eta_pod_diff_days"
+                                   decoration-danger="eta_pod_diff_days &gt; 0"
+                                   decoration-success="eta_pod_diff_days &lt; 0"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Shipment Lines" name="shipment_lines">
+                            <field name="shipment_line_ids"
+                                   invisible="not id"
+                                   domain="[('company_id', '=', company_id)]"
+                                   context="{'create': False,'shipment':1}">
+                                <list editable="bottom">
+                                    <field name="purchase_order_id" options="{'no_create':True}"
+                                           domain="[('shipment_id', '=', False)]" required="1"
+                                           context="{'shipment':1}"/>
+                                    <field name="partner_id"/>
+                                    <field name="date_planned"/>
+                                    <field name="total_order_weight"/>
+                                    <field name="total_order_cbm"/>
+                                    <field name="amount_total" widget="monetary"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Status Comments" name="comments">
+                            <field name="status_comments" placeholder="Shipment status comments..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="shipment_register_view_search" model="ir.ui.view">
+        <field name="name">shipment.register.search</field>
+        <field name="model">shipment.register</field>
+        <field name="arch" type="xml">
+            <search string="Shipments">
+                <field name="name"/>
+                <field name="container_number"/>
+                <field name="shipment_line_ids" string="Shipment Line"/>
+                <field name="freight_forwarder"/>
+                <field name="carrier_company"/>
+                <field name="carrier_route_ref"/>
+                <field name="port_departure"/>
+                <field name="destination"/>
+                <filter name="filter_open" string="Open"
+                        domain="[('state', 'not in', ('delivered', 'cancel'))]"/>
+                <filter name="filter_in_transit" string="In Transit"
+                        domain="[('state', '=', 'in_transit')]"/>
+                <filter name="filter_delivered" string="Delivered"
+                        domain="[('state', '=', 'delivered')]"/>
+                <separator/>
+                <filter name="filter_late" string="ETA Delayed"
+                        domain="[('eta_pod_diff_days', '&gt;', 0)]"/>
+                <filter name="filter_fumigation" string="Fumigation Required"
+                        domain="[('fumigation_required', '=', True)]"/>
+                <separator/>
+                <filter name="filter_departure" string="Departure Date" date="date_departure"/>
+                <filter name="filter_eta_pod" string="ETA POD" date="date_eta_pod"/>
+                <group>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_mode" string="Mode" context="{'group_by': 'shipment_mode'}"/>
+                    <filter name="group_forwarder" string="Freight Forwarder"
+                            context="{'group_by': 'freight_forwarder'}"/>
+                    <filter name="group_carrier" string="Carrier"
+                            context="{'group_by': 'carrier_company'}"/>
+                    <filter name="group_destination" string="Destination"
+                            context="{'group_by': 'destination'}"/>
+                    <filter name="group_eta_pod" string="ETA POD" context="{'group_by': 'date_eta_pod:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="shipment_register_action" model="ir.actions.act_window">
+        <field name="name">Shipments</field>
+        <field name="res_model">shipment.register</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="shipment_register_view_search"/>
+        <field name="context">{'search_default_filter_open': 1,'shipment': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first shipment</p>
+            <p>Group purchase orders into a shipment to track container, carrier and ETA.</p>
+        </field>
+    </record>
+
+    <!-- MENU -->
+    <menuitem id="shipment_register_menu"
+              name="Shipments"
+              parent="purchase.menu_purchase_root"
+              action="shipment_register_action"
+              sequence="15"/>
+</odoo>

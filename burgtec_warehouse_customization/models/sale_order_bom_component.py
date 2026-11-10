@@ -1,3 +1,5 @@
+from email.policy import default
+from datetime import datetime, time
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError
 
@@ -16,10 +18,10 @@ class SaleOrderBomComponent(models.Model):
         copy=True
     )
     # computed cost
-    total_parent_product_sale_price = fields.Monetary(currency_field='currency_id',compute='_compute_multi_total_from_bom_lines', store=True)
-    total_parent_live_unit_cost = fields.Monetary(currency_field='currency_id',compute='_compute_multi_total_from_bom_lines', store=True)
-
-    component_state_id = fields.Many2one('bom.component.state', copy=False)
+    total_parent_product_sale_price = fields.Monetary(currency_field='currency_id',
+                                                      compute='_compute_multi_total_from_bom_lines', store=True)
+    total_parent_live_unit_cost = fields.Monetary(currency_field='currency_id',
+                                                  compute='_compute_multi_total_from_bom_lines', store=True)
 
     currency_id = fields.Many2one(
         comodel_name='res.currency',
@@ -29,7 +31,21 @@ class SaleOrderBomComponent(models.Model):
         ondelete='restrict'
     )
 
-    @api.depends('order_id','order_id.currency_id')
+    is_pre_validate = fields.Boolean(related='order_id.is_pre_validate',store=True)
+            
+    validate_state = fields.Selection(related='order_id.validate_state',store=True)
+
+    make_readonly_user = fields.Boolean(compute="compute_make_readonly_usr")
+
+    def compute_make_readonly_usr(self):
+        for record in self:
+            if record.validate_state == 'pre_validate' and not record.env.user.has_group('sales_team.group_sale_manager'):
+                record.make_readonly_user = True
+            else:
+                record.make_readonly_user = False
+    
+
+    @api.depends('order_id', 'order_id.currency_id')
     def _compute_currency_id(self):
         for rec in self:
             order = rec.order_id
@@ -65,7 +81,11 @@ class SaleOrderBOMComponentLine(models.Model):
     _description = 'BOM Component Line'
     _order = 'sequence, id'
 
+    def _get_default_product_uom_id(self):
+        return self.env['uom.uom'].search([], limit=1, order='id').id
+
     name = fields.Char(string='Name')
+    mrp_bom_id = fields.Many2one('mrp.bom')
     component_id = fields.Many2one('sale.order.bom.component', string='Components', ondelete='cascade')
     order_line_id = fields.Many2one('sale.order.line', ondelete='cascade')
     # parent_product_id = fields.Many2one('product.template', string='Parent Product')
@@ -75,11 +95,15 @@ class SaleOrderBOMComponentLine(models.Model):
         string='Component',
     )
     # product_reference = fields.Char(string='Product Reference', related='product_id.default_code')
-    product_qty = fields.Float(string='Quantity', digits='Product Quantity',compute="compute_product_qty", inverse="_inverse_product_qty", store=True)
+    product_qty = fields.Float(string='Quantity', digits='Product Quantity', compute="compute_product_qty",
+                               inverse="_inverse_product_qty", store=True)
     # product_uom_qty = fields.Float(related="order_line_id.product_uom_qty",store=True)
-    unit_component_quantity = fields.Float(string='Unit Component Quantity', digits='Product Unit Quantity',default=1)
-    unit_sale_price = fields.Monetary(currency_field='currency_id',string='Unit Sale Price', compute='_compute_unit_sale_price', inverse="_inverse_unit_sale_price", store=True, readonly=False)
-    total_sale_price = fields.Monetary(currency_field='currency_id',string="Total Sale Price", compute='_compute_total_sale_price', store=True)
+    unit_component_quantity = fields.Float(string='Unit Component Quantity', digits='Product Unit Quantity', default=1)
+    unit_sale_price = fields.Monetary(currency_field='currency_id', string='Unit Sale Price',
+                                      compute='_compute_unit_sale_price', inverse="_inverse_unit_sale_price",
+                                      store=True, readonly=False)
+    total_sale_price = fields.Monetary(currency_field='currency_id', string="Total Sale Price",
+                                       compute='_compute_total_sale_price', store=True)
     supplier_id = fields.Many2one('res.partner', string='Supplier')
     is_parent = fields.Boolean(string="Is Parent")
     is_auto_generated = fields.Boolean(
@@ -91,14 +115,16 @@ class SaleOrderBOMComponentLine(models.Model):
     sequence = fields.Integer("Sequence")
     # costs
     live_unit_cost = fields.Monetary(currency_field='currency_id', string='Live Unit Cost')
-    total_live_cost = fields.Monetary(currency_field='currency_id', string='Total Live Cost', compute='_compute_total_live_cost', store=True)
-    margin_live_cost = fields.Monetary(currency_field='currency_id', string='Margin Live Cost', compute='_compute_total_sale_price', store=True)
+    total_live_cost = fields.Monetary(currency_field='currency_id', string='Total Live Cost',
+                                      compute='_compute_total_live_cost', store=True)
+    margin_live_cost = fields.Monetary(currency_field='currency_id', string='Margin Live Cost',
+                                       compute='_compute_total_sale_price', store=True)
 
     display_type = fields.Selection([
         ('line_section', "Section"),
     ], string="Display Type")
 
-    unit_margin = fields.Float(
+    unit_margin = fields.Monetary(
         string="Unit Margin($)",
         currency_field='currency_id',
         compute='_compute_unit_margin',
@@ -111,8 +137,36 @@ class SaleOrderBOMComponentLine(models.Model):
         precompute=True,
         ondelete='restrict'
     )
+    component_notes = fields.Char(string='Component Notes')
+    modification_required = fields.Boolean(string='Is Modification Required', default=False)
 
-    @api.depends('component_id','component_id.currency_id')
+    product_uom_id = fields.Many2one(
+            'uom.uom', 'Unit',
+            default=_get_default_product_uom_id, required=True)
+    
+    maximum_landed_cost = fields.Monetary(currency_field='currency_id', compute="compute_landed_costs",
+                                                  store=True)
+        
+    minimum_landed_cost = fields.Monetary(currency_field='currency_id', compute="compute_landed_costs",
+                                                      store=True)
+        
+    latest_landed_cost = fields.Monetary(currency_field='currency_id', compute="compute_landed_costs",
+                                                      store=True)
+    
+    order_state = fields.Selection(related='order_line_id.order_id.state',store=True)
+
+    qty_delivered = fields.Float(related='order_line_id.qty_delivered', store=True)
+
+    is_pre_validate = fields.Boolean(related='order_line_id.order_id.is_pre_validate', store=True)
+
+    order_planned_pick_date = fields.Date(related='order_line_id.order_id.planned_pick_date', store=True)
+
+    product_onhand_qty_at_date = fields.Float(compute="_compute_product_onhand_qty_at_date",store=True)
+
+    product_incoming_qty_at_date = fields.Float(compute="_compute_product_incoming_qty_at_date",store=True)
+
+
+    @api.depends('component_id', 'component_id.currency_id')
     def _compute_currency_id(self):
         for rec in self:
             component = rec.component_id
@@ -128,16 +182,16 @@ class SaleOrderBOMComponentLine(models.Model):
                 line.unit_margin = line.margin_live_cost / line.product_qty
             else:
                 line.unit_margin = 0.0
-    
+
     @api.depends('order_line_id.price_unit')
     def _compute_unit_sale_price(self):
         for record in self:
             order_line = record.order_line_id
             if not record.is_parent:
                 record.unit_sale_price = 0.0
-            if record.is_parent:    
+            if record.is_parent:
                 record.unit_sale_price = order_line.price_unit
-    
+
     def _inverse_unit_sale_price(self):
         for rec in self:
             if rec.is_parent:
@@ -188,8 +242,8 @@ class SaleOrderBOMComponentLine(models.Model):
             }
         }
 
-
-    @api.depends('product_qty','live_unit_cost','order_line_id.component_line_ids','order_line_id.component_line_ids.live_unit_cost', 'order_line_id.component_line_ids.product_qty')
+    @api.depends('product_qty', 'live_unit_cost', 'order_line_id.component_line_ids',
+                 'order_line_id.component_line_ids.live_unit_cost', 'order_line_id.component_line_ids.product_qty')
     def _compute_total_live_cost(self):
         for rec in self:
             child_components = False
@@ -197,7 +251,8 @@ class SaleOrderBOMComponentLine(models.Model):
             if rec.display_type:
                 rec.total_live_cost = 0
             if rec.is_parent:
-                child_components =  order_line.component_line_ids.filtered(lambda c: not c.is_parent and not c.display_type)
+                child_components = order_line.component_line_ids.filtered(
+                    lambda c: not c.is_parent and not c.display_type)
                 if not rec.product_qty > 0:
                     rec.total_live_cost = 0
                 if rec.product_qty > 0:
@@ -212,15 +267,16 @@ class SaleOrderBOMComponentLine(models.Model):
     def unlink(self):
         for rec in self:
             if not rec.env.context.get('force_delete') and rec.is_parent:
-                raise UserError(_('You are not allowed to delete parent line. If you want to go delete its order line from sales order instead!'))
+                raise UserError(
+                    _('You are not allowed to delete parent line. If you want to go delete its order line from sales order instead!'))
             bom_component = rec.component_id
             order_id = bom_component.order_id
         res = super().unlink()
-        order_lines = order_id.order_line.sorted(lambda o:o.sequence)
-        order_id.set_sequences(order_lines,10) # 10 sequence is used by default.
+        order_lines = order_id.order_line.sorted(lambda o: o.sequence)
+        order_id.set_sequences(order_lines, 10)  # 10 sequence is used by default.
         return res
-        
-    @api.depends('order_line_id.product_uom_qty','unit_component_quantity')
+
+    @api.depends('order_line_id.product_uom_qty', 'unit_component_quantity')
     def compute_product_qty(self):
         for record in self:
             order_line = record.order_line_id
@@ -229,19 +285,81 @@ class SaleOrderBOMComponentLine(models.Model):
                     record.product_qty = record.unit_component_quantity * order_line.product_uom_qty
                 else:
                     record.product_qty = record.unit_component_quantity
-            if record.is_parent:    
+            if record.is_parent:
                 record.product_qty = order_line.product_uom_qty
-    
+
     def _inverse_product_qty(self):
         for rec in self:
             if rec.is_parent:
                 rec.order_line_id.product_uom_qty = rec.product_qty
 
-    
     @api.constrains('unit_component_quantity')
     def check_unit_component_quantity(self):
         for rec in self:
             if rec.unit_component_quantity <= 0:
                 raise UserError(_('You can not set Unit Component Quantity Zero or Less than Zero !!!'))
+    
+
+    @api.depends('product_id')
+    def compute_landed_costs(self):
+        for record in self:
+            product = record.product_id
+            if not product or record.is_parent:
+                record.minimum_landed_cost = 0.0
+                record.maximum_landed_cost = 0.0
+                record.latest_landed_cost = 0.0
+                continue
+            if product:
+                record.minimum_landed_cost = product.minimum_landed_cost
+                record.maximum_landed_cost = product.maximum_landed_cost
+                record.latest_landed_cost = product.latest_landed_cost
+    
+    def _get_onhand_qty_at_date(self, product, date, warehouse=None, location=None):
+        """Return the on-hand qty of `product` as of the end of `date`."""
+        # `date` is a date object. Use end of day, otherwise the day itself is excluded.
+        to_date = datetime.combine(date, time.max)
+
+        ctx = {'to_date': to_date}
+        if warehouse:
+            ctx['warehouse_id'] = warehouse.id
+        if location:
+            ctx['location'] = location.id
+
+        return product.with_context(**ctx).qty_available
+
+    def _get_incoming_qty_at_date(self, product, date, warehouse=None, location=None):
+        """Return the incoming qty of `product` as of the end of `date`."""
+        # `date` is a date object. Use end of day, otherwise the day itself is excluded.
+        to_date = datetime.combine(date, time.max)
+
+        ctx = {'to_date': to_date}
+        if warehouse:
+            ctx['warehouse_id'] = warehouse.id
+        if location:
+            ctx['location'] = location.id
+
+        return product.with_context(**ctx).incoming_qty
+    
+    @api.depends('product_id','order_planned_pick_date')
+    def _compute_product_onhand_qty_at_date(self):
+        for record in self:
+            if not record.product_id or not record.order_planned_pick_date:
+                record.product_onhand_qty_at_date = 0.0
+                continue
+            qty = record._get_onhand_qty_at_date(record.product_id, record.order_planned_pick_date)
+            record.product_onhand_qty_at_date = qty
+    
+    @api.depends('product_id','order_planned_pick_date')
+    def _compute_product_incoming_qty_at_date(self):
+        for record in self:
+            if not record.product_id or not record.order_planned_pick_date:
+                record.product_incoming_qty_at_date = 0.0
+                continue
+            qty = record._get_incoming_qty_at_date(record.product_id, record.order_planned_pick_date)
+            record.product_incoming_qty_at_date = qty
 
 
+
+
+
+    

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_quotation_tree_bl_excel_import" model="ir.ui.view">
+        <field name="name">sale.order.quotation.list.bl.excel.import</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(sale_order_excel_import_action)d" type="action" icon="fa-file-excel-o"
+                        string="New from Excel" class="btn-secondary" display="always"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="currency_id" column_invisible="1"/>
+                <field name="purchase_order_value"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="sale_order_purchase_order_value_view_from" model="ir.ui.view">
+        <field name="name">sale.order.purchase.order.value.view.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="burgtec_warehouse_customization.sale_order_form_kit"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='customer_po_reference']" position="after">
+                <field name="currency_id" invisible="1"/>
+                <field name="purchase_order_value"/>
+                <field name="burgtec_po_id" invisible="1"/>
+                <field name="burgtec_po_url" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//header" position="after">
+                <div class="alert alert-warning" role="alert"
+                     invisible="not is_created_from_excel or not(po_value_warning)">
+                    <field name="po_value_warning"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//field[@name='processing_comments']" position="after">
+                <field name="notes" optional="hide"/>
+            </xpath>
+
+            <xpath expr="//button[@name='%(burgtec_warehouse_customization.action_bulk_action_operations)d']"
+                   position="after">
+                <button name="%(sale_order_excel_import_action)d" type="action" icon="fa-file-excel-o"
+                        string="Update from Excel" class="btn-secondary mx-2" invisible="not id"
+                        context="{'default_sale_order_id': id,
+                        'default_partner_id': partner_id,}"/>
+            </xpath>
+
+            <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                <button name="action_open_burgtec_po"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-external-link"
+                        invisible="not burgtec_po_url">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Child PO</span>
+                    </div>
+                </button>
+            </xpath>
+
+
+            <xpath expr="//field[@name='pre_validation_comments']" position="before">
+                <field name="po_dispatch_date" readonly="burgtec_po_id"/>
+                <field name="po_date_planned" readonly="burgtec_po_id"/>
+            </xpath>
+
+            <field name="order_entry_status" position="after">
+                <field name="pre_validation_comments" position="move"/>
+            </field>
+
+
+        </field>
+    </record>
+
+
+</odoo>

@@ -1,14 +1,210 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+
+    <record id="burgtec_warehouse_purchase_order_kpis_tree" model="ir.ui.view">
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="supplier_code" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="required_ready_date" width="150px" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="burgtec_warehouse_purchase_order_view_tree" model="ir.ui.view">
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="supplier_code" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="required_ready_date" width="150px" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="purchase_order_form_vendor_restrict" model="ir.ui.view">
         <field name="model">purchase.order</field>
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/list//field[@name='product_id']" position="attributes">
-                <attribute name="domain">[('purchase_ok', '=', True), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id), '|', ('seller_ids.partner_id', '=', parent.partner_id), ('seller_ids.partner_id', 'parent_of', parent.partner_id)]</attribute>
-                   <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
-
+                <attribute name="domain">[('purchase_ok', '=', True),('custom_variant_type','=','component'), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id), '|', ('seller_ids.partner_id', '=', parent.partner_id), ('seller_ids.partner_id', 'parent_of', parent.partner_id)]</attribute>
+                <attribute name="options">{'no_create': True, 'no_open': True}</attribute>
+                <attribute name="context">{'partner_id':parent.partner_id, 'quantity':product_qty, 'company_id': parent.company_id, 'code_first':True}</attribute>
             </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="supplier_code" readonly="custom_state in ['cancel','purchase'] or make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list//field[@name='product_qty']" position="before">
+                <field name="product_unit_cbm"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list//field[@name='product_qty']" position="after">
+                <field name="total_product_line_cbm"/>
+            </xpath>
+
+             <xpath expr="//div[hasclass('clearfix')]" position="before">
+                 <div class="d-flex justify-content-end fw-bold" name="total_order_cbm">
+                    <label for="total_order_cbm" string="Total CBM"/>
+                    <field name="total_order_cbm"/>
+                    <span> m³</span>
+                </div>
+            </xpath>
+
+            
+            <xpath expr="//button[@name='button_confirm'][1]" position="attributes">
+                <!-- <attribute name="invisible">state != 'sent' or not is_pre_validate</attribute> -->
+                <attribute name="invisible">1</attribute>
+                <attribute name="confirm">Are you sure?</attribute>
+                <attribute name="groups">burgtec_warehouse_customization.group_confirm_purchase_order</attribute>
+            </xpath>
+            
+            <xpath expr="//button[@name='button_confirm'][2]" position="attributes">
+                <!-- <attribute name="invisible">state != 'draft' or not is_pre_validate</attribute> -->
+                <attribute name="invisible">1</attribute>
+                <attribute name="confirm">Are you sure?</attribute>
+                <attribute name="groups">burgtec_warehouse_customization.group_confirm_purchase_order</attribute>
+            </xpath>
+            
+            <xpath expr="//button[@name='button_confirm']" position="before">
+                <button name="set_pre_validate" type="object" class="btn-warning" string="Pre-Validate" confirm="Are you sure?" invisible="is_pre_validate or custom_state in ['purchase','cancel']" groups="purchase.group_purchase_manager"/>
+                <button name="set_unvalidate" type="object" class="btn-info" string="Un-Validate" confirm="Are you sure?" invisible="not is_pre_validate or custom_state in ['purchase','cancel']" groups="purchase.group_purchase_manager"/>
+                <button name="custom_confirm_order" type="object" string="Confirm Order" confirm="Are you sure?" groups="burgtec_warehouse_customization.group_confirm_purchase_order" invisible="custom_state in ['purchase','cancel'] or not is_pre_validate"/>
+            </xpath>
+
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <field class="d-flex flex-row-reverse" name="validate_state" invisible="not validate_state" widget="badge" decoration-warning="validate_state == 'pre_validate'" decoration-info="validate_state == 'un_validate'"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="readonly" separator="or" add="custom_state == 'purchase' or make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//header" position="after">
+                <!-- General warnings computed from `_get_alerts` -->
+                <div role="alert" class="alert alert-warning" id="empty_cbm_warning" invisible="not empty_cbm_warning">
+                    <field name="empty_cbm_warning" class="o_field_html"/>
+                </div>
+            </xpath>
+
+            <xpath expr="//field[@name='currency_id']" position="after">
+                <field name="required_ready_date" readonly="custom_state in ['cancel','purchase'] or make_readonly_user"/>
+                <field name="shipment_id" readonly="1" options="{'no_open':1}" invisible="not shipment_id"/>
+            </xpath>
+
+            <!-- Readonly Logic -->
+
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+                <attribute name="options">{'no_open':1,'no_create':1}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_ref']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//field[@name='currency_id']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+                <attribute name="options">{'no_open':1,'no_create':1}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//field[@name='date_planned']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//field[@name='picking_type_id']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+                <attribute name="options">{'no_open':1,'no_create':1}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='receipt_reminder_email']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//field[@name='date_order']" position="before">
+                <field name="create_date" string="Order Creation"/>
+            </xpath>
+
+            <xpath expr="//field[@name='state']" position="replace">
+                <field name="custom_state" widget="statusbar" statusbar_visible="draft,sent,purchase" readonly="1"/>
+            </xpath>
+
+            <xpath expr="//button[@name='action_view_picking']" position="attributes">
+                <attribute name="invisible">is_shipped or custom_state != 'purchase' or incoming_picking_count == 0</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_rfq_send'][1]" position="attributes">
+                <attribute name="invisible">custom_state != 'draft'</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_rfq_send'][2]" position="attributes">
+                <attribute name="invisible">custom_state != 'sent'</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_rfq_send'][3]" position="attributes">
+                <attribute name="invisible">custom_state != 'purchase'</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_acknowledge']" position="attributes">
+                <attribute name="invisible">acknowledged or custom_state != 'purchase'</attribute>
+            </xpath>
+            
+            <xpath expr="//button[@name='print_quotation']" position="attributes">
+                <attribute name="invisible">custom_state != 'purchase'</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='%(purchase.action_report_purchase_order)d']" position="attributes">
+                <attribute name="invisible">custom_state != 'purchase'</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='button_draft']" position="attributes">
+                <attribute name="invisible">custom_state != 'cancel'</attribute>
+            </xpath>
+            
+            <xpath expr="//button[@name='button_cancel']" position="attributes">
+                <attribute name="invisible">custom_state not in ('draft', 'to approve', 'sent', 'purchase')</attribute>
+            </xpath>
+
+            <!-- <xpath expr="button[@name='action_view_picking']" position="attributes">
+                <attribute name="invisible">is_shipped or custom_state != 'purchase' or incoming_picking_count == 0</attribute>
+            </xpath> -->
+
+            <xpath expr="//button[@invisible='incoming_picking_count == 0']" position="attributes">
+                <attribute name="invisible">incoming_picking_count == 0 or custom_state not in ('purchase','cancel')</attribute>
+            </xpath>
+
+
+
+            
         </field>
     </record>
+
+
+    <!-- <record id="burgtec_warehouse_purchase_stock_extend" model="ir.ui.view">
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="button[@name='action_view_picking']" position="attributes">
+                <attribute name="invisible">is_shipped or custom_state != 'purchase' or incoming_picking_count == 0</attribute>
+            </xpath>
+
+            <xpath expr="//button[@invisible='incoming_picking_count == 0']" position="attributes">
+                <attribute name="invisible">incoming_picking_count == 0 or custom_state not in ('purchase','cancel')</attribute>
+            </xpath>
+
+        </field>
+    </record> -->
 </odoo>

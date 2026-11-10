@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="burgtec_warehouse_customization.relatedSaleOrdersButton">
+        <button class="btn btn-link" t-on-click="onOpenDialog">
+            <i class="fa fa-external-link" aria-hidden="true"></i> Related Orders
+        </button>
+    </t>
+</templates>

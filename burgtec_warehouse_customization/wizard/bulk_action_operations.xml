@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View bulk.action.operations form -->
+    <record id="view_bulk_action_operations_form" model="ir.ui.view">
+        <field name="name">view.bulk.action.operations.form</field>
+        <field name="model">bulk.action.operations</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Action Operations">
+                <group>
+                    <group>
+                        <field name="operation_type"/>
+                        <field name="global_select"/>
+                    </group>
+                    <group>
+                        <field name="target_sale_order_id" domain="[('state','in',['draft','sent'])]" invisible="operation_type != 'duplicate'" required="True" string="Target Quote" options="{'no_open':1}"/>
+                    </group>
+                    <group>
+                    </group>
+                </group>
+                <field name="bulk_lines" mode="list"  no_label="1" invisible="not operation_type">
+                    <list class="no_reorder" editable="bottom" delete="0" create="0">
+                        <field name="is_check" force_save="1" string="Check" width="60px;"/>
+                        <field name="product_id" width="500px;" force_save="1" options="{'no_open':1}" readonly="1"/>
+                        <field name="product_uom_qty" width="150px;" force_save="1" readonly="1"/>
+                        <field name="price_unit" force_save="1" readonly="1"/>
+                        <field name="price_subtotal" force_save="1" readonly="1"/>
+                        <field name="currency_id" column_invisible="1" force_save="1"/>
+                        <field name="order_line_id" force_save="1" column_invisible="1"/>
+                    </list>
+                </field>
+
+                <footer>
+                    <button name="action_bulk_delete" type="object" string="Delete" class="oe_highlight"
+                            icon="fa-trash-o" title="delete"
+                            invisible="operation_type != 'delete'"
+                            confirm="Are you sure you want to delete selected lines? Once it's gone, it's gone for good!"/>
+                    <button name="action_duplicate" type="object" string="Duplicate" class="oe_highlight"
+                            icon="fa-clone" title="duplicate"
+                            invisible="operation_type != 'duplicate'"
+                            confirm="Are You Sure You Want to Duplicate the Selected Line(s)?"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action bulk.action.operations -->
+    <record id="burgtec_warehouse_customization.action_bulk_action_operations" model="ir.actions.act_window">
+        <field name="name">Bulk Action Operations</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">bulk.action.operations</field>
+        <field name="view_mode">form</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

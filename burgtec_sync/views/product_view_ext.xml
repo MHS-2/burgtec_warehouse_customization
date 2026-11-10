@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Product Variant form OG -->
+    <record id="product_normal_form_view_inherit_burgtec_product_info" model="ir.ui.view">
+        <field name="name">product.product.form.burgtec.product.info</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='inventory']" position="after">
+                <page name="burgtec_info" string="Burgtec Info" invisible="not burgtec_product_id">
+                    <group>
+                        <group>
+                            <field name="burgtec_product_id"/>
+                            <field name="burgtec_product_url"/>
+                        </group>
+                        <group>
+                            <div>
+                                <button name="action_open_burgtec_product" string="Burgtec Product" type="object"
+                                        class="oe_stat_button" icon="fa-external-link"
+                                        invisible="not burgtec_product_url">
+                                </button>
+                            </div>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

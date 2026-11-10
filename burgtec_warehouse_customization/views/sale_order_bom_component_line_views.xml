@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_bom_component_line_list" model="ir.ui.view">
+        <field name="name">view.sale.order.bom.component.line.list</field>
+        <field name="model">sale.order.bom.component.line</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0">
+                <field name="sequence" readonly="1" optional="hide"/>
+                <field name="is_auto_generated" column_invisible="1"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="is_parent" column_invisible="1" force_save="1"/>
+                <!-- <field name="name" string="" readonly="1"/> -->
+                 <field name="order_planned_pick_date" string="Pick Date"/>
+                <field name="product_id" width="400px" string="Component"/>
+                <!-- <field name="component_notes" width="300px" readonly="order_state == 'sale'"  force_save="1" class="text-start" invisible="is_parent or display_type" optional="show"/>
+                <field name="modification_required" width="170px" readonly="order_state == 'sale'" force_save="1" class="text-center" invisible="is_parent or display_type" optional="show"/>
+                <field name="supplier_id" width="120px" class="text-center"
+                        readonly="order_state == 'sale'" options="{'no_create':1}" optional="hide"/> -->
+                <field name="product_onhand_qty_at_date"/>
+                <field name="product_incoming_qty_at_date"/>
+                <field name="product_qty"
+                        width="60px"
+                        class="text-center"
+                        readonly="order_state == 'sale' or not is_parent or display_type " string="Demand Qty"/>
+                        
+                <!-- <field name="unit_component_quantity" width="190px" class="text-center"
+                        readonly="order_state == 'sale' or is_parent or display_type" force_save="1"/>
+
+                <field name="unit_sale_price" width="100px"
+                        readonly="order_state == 'sale' or not is_parent"
+                        force_save="1"/>
+                <field name="total_sale_price" width="100px" class="text-center"
+                        readonly="order_state == 'sale' or is_parent or not is_parent"
+                        force_save="1"/>
+
+                <field name="live_unit_cost" readonly="is_parent" force_save="1" optional="show"
+                        decoration-warning="1 == 1" decoration-bf="1 == 1"/>
+                <field name="total_live_cost" width="100px" class="text-center"
+                        readonly="1"
+                        force_save="1" decoration-warning="1 == 1" optional="hide"/>
+
+                <field name="margin_live_cost"
+                        readonly="1" force_save="1" invisible="not is_parent" width="120px"
+                        class="text-center"
+                        decoration-warning="1 == 1"
+                        optional="hide"/>
+            
+                <field name="minimum_landed_cost" width="150px" invisible="is_parent"/>
+                <field name="maximum_landed_cost" width="150px" invisible="is_parent"/>
+                <field name="latest_landed_cost" width="150px" invisible="is_parent"/> -->
+            </list>
+        </field>
+    </record>
+
+    <record id="view_sale_order_bom_component_line_search" model="ir.ui.view">
+        <field name="name">sale.order.bom.component.line.search</field>
+        <field name="model">sale.order.bom.component.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <filter name="pick_date" string="Pick Date" date="order_planned_pick_date"/>
+                <separator/>
+                <filter string="Component" name="group_by_product_id"
+                        context="{'group_by': 'product_id'}"/>
+                <filter string="Pick Date" name="group_by_date" domain="[]" context="{'group_by': 'order_planned_pick_date'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_sale_order_bom_component_line_graph" model="ir.ui.view">
+        <field name="name">view.sale.order.bom.component.line.graph</field>
+        <field name="model">sale.order.bom.component.line</field>
+        <field name="arch" type="xml">
+            <graph string="Sale Pick Date Analysis" type="line" sample="1">
+                <!-- The timeline (X-Axis) goes here -->
+                <field name="order_planned_pick_date" interval="day"/>
+                <field name="product_id"/>
+                <!-- The quantitative value (Y-Axis) goes here -->
+                <field name="product_qty" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_sale_order_bom_component_line" model="ir.actions.act_window">
+        <field name="name">BOM Components Analysis</field>
+        <field name="res_model">sale.order.bom.component.line</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">list,graph</field>
+        <field name="context">{'search_default_group_by_product_id': 1}</field>
+        <field name="domain">[('is_parent','!=',True),('order_planned_pick_date','!=',False),('order_state','!=','cancel'),('display_type','=',False)]</field>
+        <field name="target">current</field> 
+    </record>
+
+    <menuitem id="root_menu_sale_order_bom_component_line" parent="sale.menu_sale_report" action="action_sale_order_bom_component_line" name="Component At Pick Date Analysis" sequence="9998"/>
+
+
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_quotation_creation_excel_import,quotation.creation.excel.import,model_quotation_creation_excel_import,,1,1,1,1
+access_quotation_creation_excel_import_line,quotation.creation.excel.import.line,model_quotation_creation_excel_import_line,,1,1,1,1

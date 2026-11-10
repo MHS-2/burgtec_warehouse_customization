@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Stock Inventory With Landed Costs Report: add the Source column -->
+    <record id="view_lc_stock_inventory_report_list_legacy" model="ir.ui.view">
+        <field name="name">view.lc.stock.inventory.report.list.legacy</field>
+        <field name="model">lc.stock.inventory.report</field>
+        <field name="inherit_id" ref="burgtec_warehouse_customization.view_lc_stock_inventory_report_list"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_date']" position="before">
+                <field name="source" width="100px"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- The original report had no search view -->
+    <record id="view_lc_stock_inventory_report_search_legacy" model="ir.ui.view">
+        <field name="name">view.lc.stock.inventory.report.search.legacy</field>
+        <field name="model">lc.stock.inventory.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="partner_id"/>
+                <field name="source"/>
+                <filter name="filter_purchase" string="Purchase" domain="[('source', '=', 'purchase')]"/>
+                <filter name="filter_legacy" string="Legacy" domain="[('source', '=', 'legacy')]"/>
+                <separator/>
+                <filter name="group_source" string="Source" context="{'group_by': 'source'}"/>
+                <filter name="group_product" string="Product" context="{'group_by': 'product_id'}"/>
+            </search>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- View stock.in.stock.out.report View List -->
+    <record id="view_stock_in_stock_out_report_list" model="ir.ui.view">
+        <field name="name">view.stock.in.stock.out.report.list</field>
+        <field name="model">stock.in.stock.out.report</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- View stock.in.stock.out.report form -->
+    <record id="view_stock_in_stock_out_report_form" model="ir.ui.view">
+        <field name="name">view.stock.in.stock.out.report.form</field>
+        <field name="model">stock.in.stock.out.report</field>
+        <field name="arch" type="xml">
+            <form string="Stock In Stock Out Report" create="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Name..." readonly="1"/>
+                        </h1>
+                    </div>
+                    <div class="d-flex justify-content-start">
+                        <label for="date_from" string="Date From"/>
+                        <field name="date_from" string="From Date" class="mx-4"/>
+                        <label for="date_to" string="Date To"/>
+                        <field name="date_to" string="To Date" class="mx-4"/>
+                        <button type="object" name="fetch_report_data" string="Fetch Report" class="btn btn-primary mx-4"/>
+                    </div>
+                    <field name="dashboard_html" widget="html" invisible="not dashboard_html" readonly="1"/>
+                    <notebook>
+                        <page name="summary" string="Summary">
+                            <field name="stock_summary_line_ids" readonly="1">
+                                <list limit="80" editable="bottom">
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="product_id" width="350px"/>
+                                    <field name="uom_id"/>
+                                    <!-- <field name="stock_opening_qty" width="150px" sum="total_stock_opening_qty"/> -->
+                                    <!-- <field name="stock_opening_value" width="150px" sum="total_stock_opening_value"/> -->
+                                    <field name="purchased_qty" sum="total_purchased_qty"/>
+                                    <field name="received_qty" sum="total_received_qty"/>
+                                    <field name="total_qty_billed" sum="total_qty_billed" width="150px"/>
+                                    <!-- <field name="received_value" sum="total_received_value"/> -->
+                                    <field name="total_to_sell_qty" string="Total Qty To Deliver" width="150px" sum="total_to_sell_qty"/>
+                                    <field name="picked_sold_qty" string="Qty Delivered" width="150px" sum="total_picked_sold_qty"/>
+                                    <field name="to_be_sell_qty" string="Remaining Qty To Deliver" width="200px" sum="total_to_be_sell_qty"/>
+                                    <!-- <field name="picked_sold_value" width="150px" sum="total_picked_sold_value"/> -->
+                                    <!-- <field name="stock_closing_qty" width="150px" sum="total_stock_closing_qty"/>
+                                    <field name="stock_closing_value" width="150px" sum="total_stock_closing_value"/> -->
+                                    <field name="qty_available" width="150px" sum="total_qty_available"/>
+                                    <field name="available_stock_value" width="150px" sum="total_available_stock_value"/>
+                                    <field name="total_landed_cost" width="150px"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action stock.in.stock.out.report -->
+    <record id="action_stock_in_stock_out_report" model="ir.actions.act_window">
+        <field name="name">Stock In Stock Out Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.in.stock.out.report</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                There is no examples click here to add new Stock In Stock Out Report.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_stock_in_stock_out_report" parent="stock.menu_warehouse_report" action="action_stock_in_stock_out_report" name="Stock In &amp; Out Report" sequence="9999"/>
+
+
+</odoo>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="burgtec_warehouse_customization.relatedSaleOrders">
+        <Dialog size="'xl'" title="'Related Confirmed Sale Orders'">
+            <div style="overflow-x: auto;">
+                <t t-if="props.orderData.length">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th width="15%">Sales Order</th>
+                                <th width="15%">Order Date</th>
+                                <th width="15%">Scheduled Date</th>
+                                <th width="45%">Customer</th>
+                                <th width="10%">Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="props.orderData" t-as="order" t-key="order.order_id">
+                                <tr>
+                                    <td data-label="Order Name" style="white-space: break-spaces; text-align:left;"><t t-out="order.name"/></td>
+                                    <td data-label="Order Date" style="white-space: break-spaces;"><t t-out="order.date_order"/></td>
+                                    <td data-label="Scheduled Date" style="white-space: break-spaces;"><t t-out="order.scheduled_date"/></td>
+                                    <td data-label="Customer"><t t-out="order.customer"/></td>
+                                    <td data-label="Quantity"><t t-out="order.quantity"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+                <t t-else="">
+                    <div class="alert alert-warning w-100 d-flex align-items-center gap-1" role="alert">
+                        <span>No Confirmed Sales Order Found!!</span>
+                    </div>
+                </t>
+            </div>
+            <!-- <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="onConfirm">Confirm</button>
+                <button class="btn btn-secondary" t-on-click="onCancel">Cancel</button>
+            </t> -->
+        </Dialog>
+    </t>
+</templates>

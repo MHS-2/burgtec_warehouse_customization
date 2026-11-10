@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_burgtec" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.burgtec</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Burgtec Sync" string="Burgtec Sync"
+                     name="burgtec_sync" groups="base.group_system">
+                    <block title="Burgtec Sync" name="burgtec_sync_block">
+                        <setting string="Burgtec URL"
+                                 help="Base address of Odoo 18, e.g. http://localhost:8069">
+                            <field name="burgtec_sync_url"/>
+                        </setting>
+                        <setting string="Burgtec Database"
+                                 help="Database name of the Odoo 18 instance">
+                            <field name="burgtec_sync_db"/>
+                        </setting>
+                        <setting string="Burgtec Token"
+                                 help="Shared secret. Must match the token in Odoo 18.">
+                            <field name="burgtec_sync_token" password="True"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

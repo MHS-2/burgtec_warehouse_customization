@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="burgtec_warehouse_customization.StockReportDashboard">
+        <div class="row mt-4 mx-4">
+            <div class="col-2">
+                <div class="card">
+                    <div class="row card-body text-center align-items-center">
+                        <div class="col-3">
+                            <i class="fa-3x fa fa-cube text-primary" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-9 text-start">
+                            <h2 class="fw-bold card-title"><t t-out="state.dashboardValues.limit"/></h2>
+                            <p class="fw-bold card-text">Products</p>
+                            <p class="text-muted">Monitored</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card">
+                    <div class="row card-body text-center align-items-center">
+                        <div class="col-3">
+                            <i class="fa-3x fa fa-exclamation-triangle text-warning" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-9 text-start">
+                            <h2 class="fw-bold card-title"><t t-out="state.dashboardValues.low_or_negative"/></h2>
+                            <p class="fw-bold card-text">At Risk</p>
+                            <p class="text-muted">Low or Negative</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card">
+                    <div class="row card-body text-center align-items-center">
+                        <div class="col-3">
+                            <i class="fa-3x fa fa-arrow-down text-danger" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-9 text-start">
+                            <h2 class="fw-bold card-title"><t t-out="state.dashboardValues.lowest_forecast_value"/></h2>
+                            <p class="fw-bold card-text">Lower Forecast</p>
+                            <p>-</p>
+                            <!-- <p class="text-muted"><t t-out="state.dashboardValues.lowest_forecast_product_name"/></p> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card">
+                    <div class="row card-body text-center align-items-center">
+                        <div class="col-3">
+                            <i class="fa-3x fa fa-line-chart text-success" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-9 text-start">
+                            <h2 class="fw-bold card-title"><t t-out="state.dashboardValues.highest_forecast_value"/></h2>
+                            <p class="fw-bold card-text">Highest Forecast</p>
+                            <p>-</p>
+                            <!-- <p class="text-muted"><t t-out="state.dashboardValues.highest_forecast_product_name"/></p> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card">
+                    <div class="row card-body text-center align-items-center">
+                        <div class="col-3">
+                            <i class="fa-3x fa fa-shopping-cart text-info" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-9 text-start">
+                            <h2 class="fw-bold card-title"><t t-out="state.dashboardValues.incoming_qty"/></h2>
+                            <p class="fw-bold card-text">Incoming</p>
+                            <p>-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="card">
+                    <div class="row card-body text-center align-items-center">
+                        <div class="col-3">
+                            <i class="fa-3x fa fa-truck text-info" aria-hidden="true"></i>
+                        </div>
+                        <div class="col-9 text-start">
+                            <h2 class="fw-bold card-title"><t t-out="state.dashboardValues.outgoing_qty"/></h2>
+                            <p class="fw-bold card-text">Outgoing</p>
+                            <p>-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </t>
+</templates>

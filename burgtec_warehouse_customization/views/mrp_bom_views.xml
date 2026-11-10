@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-  <odoo>
-      
+<odoo>
+
     <!-- View mrp.bom form -->
     <record id="burgtec_warehouse_customization.view_mrp_bom_form" model="ir.ui.view">
         <field name="name">burgtec.warehouse.customization.view.mrp.bom.form</field>
@@ -8,9 +8,65 @@
         <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='bom_line_ids']//field[@name='product_id']" position="attributes">
-              <attribute name="domain" add="[('custom_variant_type','=','component')]" separator=" or "/>
+                <attribute name="options">{'no_create':1}</attribute>
+                <attribute name="domain" add="[('custom_variant_type','=','component')]" separator=" or "/>
             </xpath>
+
+            <xpath expr="//field[@name='product_tmpl_id']" position="attributes">
+                <attribute name="options">{'no_create':1}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='product_id']" position="attributes">
+                <attribute name="options">{'no_create':1}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='bom_line_ids']/list/field[@name='product_qty']" position="before">
+                <field name="component_notes"/>
+                <field name="modification_required" width="190px"/>
+            </xpath>
+
+            <xpath expr="//page[@name='miscellaneous']//group" position="after">
+                <field name="custom_component_ids" widget="one2many" readonly="1">
+                    <list create="0" editable="bottom">
+                            <!-- Section header fields -->
+                            <!-- <field name="sequence" widget="handle" invisible="1"/> -->
+                            <field name="display_type" column_invisible="1" string=" "/>
+                            <!-- <field name="name" readonly="1"/> -->
+
+                            <field name="is_auto_generated" column_invisible="1"/>
+
+                            <field name="is_parent" column_invisible="1" force_save="1"/>
+
+                            <field name="product_id" width="200px"
+                                    options="{'no_open':1,'no_create':1}"
+                                    force_save="1" style="color:green;" required="1"/>
+                            <!-- <field name="sequence"/> -->
+                            <field name="order_line_id"/>
+                            <field name="product_qty"
+                                    width="60px"
+                                    force_save="1"/>
+                            <field name="unit_component_quantity" width="190px" class="text-center"
+                                    force_save="1"/>
+                            <field name="unit_sale_price" width="100px"
+                                    force_save="1"/>
+                            <field name="total_sale_price" width="100px"
+                                    force_save="1"/>
+                            <field name="live_unit_cost"  force_save="1" optional="show"
+                                    decoration-warning="1 == 1" decoration-bf="1 == 1"/>
+                            <field name="total_live_cost" width="100px"
+                                    readonly="1"
+                                    force_save="1" decoration-warning="1 == 1" optional="hide"/>
+                            <field name="supplier_id"
+                                    options="{'no_create':1}" optional="hide"/>
+                            <field name="margin_live_cost"
+                                    readonly="1" force_save="1" decoration-warning="1 == 1"
+                                    optional="hide"/>
+
+                        </list>
+                </field>
+            </xpath>
+
         </field>
     </record>
 
-  </odoo>
+</odoo>

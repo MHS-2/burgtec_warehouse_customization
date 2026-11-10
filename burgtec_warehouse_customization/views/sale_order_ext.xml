@@ -1,4 +1,63 @@
 <odoo>
+
+    <!-- =========================    List View     =================================== -->
+
+    <record id="burgtec_warehouse_customization_view_quotation_tree_with_onboarding" model="ir.ui.view">
+        <field name="name">burgtec.warehouse.customization.view.quotation.tree.with.onboarding</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="width">300px</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="width">150px</attribute>
+            </xpath>
+
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="customer_po_reference" string="Customer PO Ref" width="150px"/>
+                <field name="planned_pick_date" string="Planned Pick"/>
+                <field name="order_entry_complete" string="Order Entry"/>
+                <field name="order_entry_status" width="250px"/>
+                <field name="pre_validation_comments" string="Pre Validation" width="250px"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="burgtec_warehouse_customization_sale_order_list_upload" model="ir.ui.view">
+        <field name="name">burgtec.warehouse.customization.sale.order.list.upload</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_list_upload"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="width">300px</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='user_id']" position="attributes">
+                <attribute name="width">150px</attribute>
+            </xpath>
+
+
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="customer_po_reference" string="Customer PO Ref" width="150px"/>
+                <field name="planned_pick_date" string="Planned Pick"/>
+                <field name="order_entry_complete" string="Order Entry"/>
+                <field name="order_entry_status" width="250px"/>
+                <field name="pre_validation_comments" string="Pre Validation" width="250px"/>
+            </xpath>
+        </field>
+    </record>
+
+    
+    <!-- =========================    List View     =================================== -->
+
+
+
+    <!-- =========================    FORM View     =================================== -->
     <record id="sale_order_form_kit" model="ir.ui.view">
         <field name="name">sale.order.form.kit</field>
         <field name="model">sale.order</field>
@@ -20,7 +79,8 @@
             <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']"
                    position="after">
                 <field name="kit_bom_id" optional="show" options="{'no_create': True, 'no_open': True}"
-                       required="True"/>
+                       required="True" width="170px" readonly="not product_updatable"/>
+                <field name="processing_comments" width="160px" placeholder="Add Comments Here."/>
             </xpath>
 
             <xpath expr="//page[@name='other_information']//field[@name='source_id']" position="after">
@@ -32,12 +92,13 @@
             </xpath>
 
             <xpath expr="//field[@name='order_line']" position="before">
-                <div class="alert alert-warning w-100 d-flex align-items-center gap-1" invisible="bom_component_id"  role="alert">
+                <div class="alert alert-warning w-100 d-flex align-items-center gap-1" invisible="bom_component_id"
+                     role="alert">
                     <span>Save Sales Order To Add Products and their BOM Kits.</span>
                 </div>
             </xpath>
 
-            <xpath expr="//field[@name='order_line']//list//field[@name='sequence']" position="replace">
+            <xpath expr="//field[@name='order_line']//list//field[@name='sequence']" position="after">
                 <field name="sequence" invisible="combo_item_id" readonly="1" optional="hide"/>
             </xpath>
 
@@ -57,9 +118,154 @@
                 <field name="total_live_unit_cost" width="155px" optional="hide"/>
             </xpath>
 
-            <xpath expr="//field[@name='state']" position="before">
-                <field name="floating_table_html" widget="html"/>
+            <xpath expr="//div[hasclass('oe_button_box')]" position="before">
+                <div class="d-flex flex-row justify-content-between align-items-start w-100">
+                    <field name="floating_table_html" widget="html" class="oe_inline"/>
+                    <field name="validate_state"
+                        widget="badge"
+                        invisible="not validate_state"
+                        decoration-warning="validate_state == 'pre_validate'"
+                        decoration-info="validate_state == 'un_validate'"/>
+                </div>
             </xpath>
+
+            <xpath expr="//group[@name='note_group']" position="after">
+                <field name="floating_table_html" widget="html" class="d-flex oe_inline"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_template_id']"
+                   position="attributes">
+                <attribute name="options">{'show_label_warning': True, 'no_open':True, 'no_create':True}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_id']"
+                   position="attributes">
+                <attribute name="options">{'show_label_warning': True, 'no_open':True, 'no_create':True}</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']//list//control" position="replace">
+                <control>
+                    <create name="add_product_control" string="Add a product"/>
+                </control>
+            </xpath>
+            <xpath expr="//field[@name='order_line']" position="before">
+                <button name="%(burgtec_warehouse_customization.action_bulk_action_operations)d"
+                        string="⚒ Bulk Operations"
+                        type="action"
+                        class="btn-primary"/>
+            </xpath>
+
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="readonly" separator="or" add="custom_state == 'sale'"/>
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+            </xpath>
+
+            <xpath expr="//button[@name='action_confirm'][1]" position="attributes">
+                <attribute name="confirm">Confirming the Sales Order will create a Delivery Order containing the product’s components added to the Sales Order. You will not be allowed to edit Products and their components once confirmed. If you are sure then proceed ahead.</attribute>
+                <!-- <attribute name="invisible">custom_state != 'sent' or not is_pre_validate</attribute> -->
+                <attribute name="invisible">1</attribute>
+                <attribute name="groups">burgtec_warehouse_customization.group_confirm_sales_order</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_confirm'][2]" position="attributes">
+                <attribute name="confirm">Confirming the Sales Order will create a Delivery Order containing the product’s components added to the Sales Order. You will not be allowed to edit Products and their components once confirmed. If you are sure then proceed ahead.</attribute>
+                <!-- <attribute name="invisible">custom_state != 'draft' or not is_pre_validate</attribute> -->
+                <attribute name="invisible">1</attribute>
+                <attribute name="groups">burgtec_warehouse_customization.group_confirm_sales_order</attribute>
+            </xpath>
+
+            <xpath expr="//form" position="attributes">
+                <attribute name="duplicate">0</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="customer_po_reference" string="Customer PO Ref" placeholder="Customer PO Reference" readonly="make_readonly_user or custom_state in ['sale','cancel']"/>
+                <field name="planned_pick_date" string="Planned Pick" required="1" placeholder="Planned Pick Date" readonly="make_readonly_user"/>
+                <!--  or custom_state in ['sale','cancel'] (For Planned Pick Date, Right Leaving it Open) -->
+                <field name="order_entry_complete" string="Order Entry" placeholder="Order Entry Complete Date" readonly="make_readonly_user or custom_state in ['sale','cancel']"/>
+                <field name="order_entry_status" placeholder="Order Entry Status" readonly="make_readonly_user or custom_state in ['sale','cancel']"/>
+            </xpath>
+
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="pre_validation_comments" string="Pre Validation" placeholder="Comments" readonly="make_readonly_user or custom_state in ['sale','cancel']"/>
+            </xpath>
+
+            <!-- PRE VALIDATE Buttons -->
+             <xpath expr="//button[@name='action_confirm']" position="before">
+                <button name="set_pre_validate" type="object" string="Pre-Validate" class="btn-warning" confirm="Are you sure? Once Pre Validated, Only Sales Administrator can edit the quotation." groups="sales_team.group_sale_manager" invisible="state in ['sale','cancel'] or is_pre_validate"/>
+                <button name="set_un_validate" type="object" string="Un-Validate" class="btn-info" confirm="Are you sure?" invisible="custom_state in ['sale','cancel'] or not is_pre_validate" groups="sales_team.group_sale_manager"/>
+                <button name="custom_confirm_order" type="object" string="Confirm Order" confirm="Are you sure?" groups="burgtec_warehouse_customization.group_confirm_sales_order" invisible="custom_state in ['sale','cancel'] or not is_pre_validate"/>
+             </xpath>
+
+             <!-- Readonly fields for non admin users when prevalidated! -->
+              <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="options">{'no_open':1,'no_create':1}</attribute>
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+              </xpath>
+
+              <xpath expr="//field[@name='validity_date']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+              </xpath>
+
+              <xpath expr="//field[@name='date_order']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+              </xpath>
+
+              <xpath expr="//field[@name='pricelist_id']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+              </xpath>
+
+              <xpath expr="//field[@name='payment_term_id']" position="attributes">
+                <attribute name="readonly" separator="or" add="make_readonly_user"/>
+              </xpath>
+
+              <xpath expr="//field[@name='order_line']/list/field[@name='product_id']" position="before">
+                <field name="line_group_name" string="Group" optional="hide" width="170px"/>
+                <field name="line_section_name" string="Code" optional="hide" width="170px"/>
+              </xpath>
+
+              <xpath expr="//field[@name='state']" position="replace">
+                <field name="custom_state" widget="statusbar" statusbar_visible="draft,sent,sale"/>
+              </xpath>
+
+              <xpath expr="//button[@name='action_quotation_send'][1]" position="attributes">
+                <attribute name="invisible">custom_state != 'draft'</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='action_quotation_send'][2]" position="attributes">
+                <attribute name="invisible">custom_state != 'draft' or invoice_count &gt;= 1</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='action_quotation_send'][3]" position="attributes">
+                <attribute name="invisible">custom_state == 'draft' or invoice_count &gt;= 1</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='action_quotation_send'][4]" position="attributes">
+                <attribute name="invisible">custom_state not in ('sent', 'sale')</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='sale.action_report_saleorder']" position="attributes">
+                <attribute name="invisible">custom_state == 'sale'</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='action_cancel']" position="attributes">
+                <attribute name="invisible">custom_state not in ['draft', 'sent', 'sale'] or not id or locked</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='action_draft']" position="attributes">
+                <attribute name="invisible">custom_state != 'cancel'</attribute>
+              </xpath>
+
+              <xpath expr="//button[@name='action_view_delivery']" position="attributes">
+                <attribute name="invisible">delivery_count == 0 or custom_state not in ['sale','cancel']</attribute>
+              </xpath>
+
+
+
+
         </field>
     </record>
+
+    <!-- =========================    FORM View     =================================== -->
+
 </odoo>
